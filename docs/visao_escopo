@@ -1,0 +1,91 @@
+1. Objetivo
+
+Documentar a arquitetura da aplicação de captura e análise automática de notas fiscais fotografadas, desde o upload no Google Drive até a pesquisa histórica de preços.
+
+2. Visão Geral do Sistema
+
+A aplicação monitora uma pasta no Google Drive, detecta novas imagens de nota fiscal, decodifica a imagem e extrai dados de itens, data, local e preços, e armazena tudo em um banco de dados. Um frontend web permite consultar o histórico de preços por termo de pesquisa.
+
+3. Casos de Uso
+
+Atores
+
+Usuário Administrador
+
+Script de Monitoramento
+
+Casos de Uso
+
+CódigoDescriçãoAtor
+
+UC01
+
+Adicionar nova imagem na pasta
+
+Usuário Administrador
+
+UC02
+
+Monitorar diariamente a pasta
+
+Script de Monitoramento
+
+UC03
+
+Processar novas imagens detectadas (OCR e parser de texto)
+
+Script de Monitoramento
+
+UC04
+
+Atualizar banco de dados com dados extraídos das imagens
+
+Script de Monitoramento
+
+UC05
+
+Consultar histórico de preços
+
+Usuário Administrador
+
+4. Arquitetura Técnica
+
+4.1. Com a simplificação proposta, a aplicação seguirá o fluxo baseado em OCR direto, sem dependência de consultas HTTP externas.
+
+Google Drive API: google-api-python-client para listar e baixar imagens.
+
+AWS EventBridge: Usar o AWS Event Bridge para startar o script da aplicacao que vai consultar a pasta do google drive onde estarao as imagens
+
+4.2. Processamento de Imagem
+
+pytesseract: OCR para extrair o conteúdo textual da imagem da nota.
+
+Regras de Parsing: Expressões regulares e heurísticas para segmentar itens, valores, datas e local.
+
+4.3. Persistência de Dados
+
+PostgreSQL (ou SQLite para MVP)
+
+Tabelas: compras, itens_compra, mercados.
+
+SQLAlchemy: ORM para abstração de dados.
+
+4.4. API Backend
+
+Flask ou FastAPI: exposição de endpoint de busca.
+
+Endpoint /search?term=<termo> retorna JSON com histórico de preços.
+
+4.5. Frontend Web
+
+React simples ou Jinja2 com Bootstrap.
+
+Página única: campo de busca + tabela de resultados.
+
+4.6. Infraestrutura
+
+Docker: containerização de serviços.
+
+CI/CD: GitHub Actions para build e deploy.
+
+Heroku / AWS Elastic Beanstalk para hospedagem.

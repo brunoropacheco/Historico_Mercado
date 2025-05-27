@@ -1,0 +1,36 @@
+@startuml diagrama_mvc
+skinparam componentStyle rectangle
+left to right direction
+
+package "Apresentação (View)" {
+  [templates/index.html]
+  [static/styles.css]
+}
+
+package "Controle (Controller)" {
+  [routes.py]
+  [controllers/process_controller.py]
+  [controllers/search_controller.py]
+}
+
+package "Modelo (Model)" {
+  [models/database.py]
+  [models/compra.py]
+  [models/itens_compra.py]
+}
+
+package "Serviços Auxiliares" {
+  [utils/ocr_parser.py]
+}
+
+' Fluxos
+[templates/index.html] --> [routes.py] 
+[routes.py] --> [controllers/search_controller.py]
+[controllers/process_controller.py] --> [utils/ocr_parser.py]
+[controllers/process_controller.py] --> [models/compra.py]
+[controllers/process_controller.py] --> [models/itens_compra.py]
+[controllers/search_controller.py] --> [models/compra.py]
+[controllers/search_controller.py] --> [models/itens_compra.py]
+[models/compra.py] --> [models/database.py]
+[models/itens_compra.py] --> [models/database.py]
+@enduml

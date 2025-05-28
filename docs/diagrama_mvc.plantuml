@@ -23,9 +23,16 @@ package "Serviços Auxiliares" {
   [utils/ocr_parser.py]
 }
 
+package "Processos Batch" {
+  [scripts/process_daily.py]
+}
+
 ' Fluxos
 [templates/index.html] --> [routes.py] 
 [routes.py] --> [controllers/search_controller.py]
+
+[scripts/process_daily.py] --> [controllers/process_controller.py] : Aciona processamento
+
 [controllers/process_controller.py] --> [utils/ocr_parser.py]
 [controllers/process_controller.py] --> [models/compra.py]
 [controllers/process_controller.py] --> [models/itens_compra.py]

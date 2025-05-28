@@ -11,6 +11,7 @@ package "Sistema de Historico de Precos" {
   usecase "UC03\nProcessar novas imagens detectadas" as UC03
   usecase "UC04\nAtualizar banco de dados com dados das imagens" as UC04
   usecase "UC05\nConsultar historico de precos" as UC05
+  usecase "UC06\nConfigurar API e Usuario de Servico no GCP" as UC06
 }
 
 Admin --> UC01
@@ -18,4 +19,5 @@ Monitor --> UC02
 Monitor --> UC03
 Monitor --> UC04
 Admin --> UC05
+Admin --> UC06
 @enduml

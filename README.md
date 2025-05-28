@@ -8,7 +8,25 @@ O sistema é composto por dois principais módulos:
 - **Batch Diário:** Responsável por monitorar uma pasta no Google Drive, detectar novas imagens de notas fiscais, processar as imagens com OCR, extrair os dados relevantes e atualizar o banco de dados.
 - **Web App:** Permite ao usuário consultar o histórico de preços de produtos a partir dos dados extraídos.
 
-## Casos de Uso
+## Status do Projeto (Versão 0.1.0 - Em Desenvolvimento)
+
+Atualmente, o projeto encontra-se em fase inicial de desenvolvimento. As seguintes funcionalidades foram implementadas:
+
+*   **Monitoramento de Pasta no Google Drive:** O script `scripts/process_daily.py` consegue monitorar uma pasta especificada no Google Drive em busca de novas imagens.
+*   **Download de Imagens:** Novas imagens detectadas são baixadas para a pasta local `data/images`.
+*   **Extração Básica de Dados com OCR:** Utilizando `pytesseract`, o sistema realiza a extração de texto de imagens de notas fiscais.
+*   **Exibição de Dados Extraídos:** Os dados brutos extraídos pelo OCR e algumas informações básicas da imagem (nome, tamanho, data) são printados no console.
+
+**Funcionalidades Ainda Não Implementadas / Em Desenvolvimento:**
+
+*   Parser robusto e estruturação completa dos dados da nota fiscal (itens, preços, estabelecimento, etc.).
+*   Integração com banco de dados para armazenamento do histórico de preços.
+*   Desenvolvimento do Web App para consulta dos dados.
+*   Automação completa do processo batch (agendamento, tratamento de erros robusto).
+
+O objetivo é evoluir para um sistema completamente automatizado e com uma interface web funcional.
+
+## Casos de Uso (Planejados)
 
 - **UC01:** Adicionar nova imagem na pasta (Administrador)
 - **UC02:** Monitorar diariamente a pasta (Script de Monitoramento)
@@ -16,28 +34,30 @@ O sistema é composto por dois principais módulos:
 - **UC04:** Atualizar banco de dados com dados das imagens (Script de Monitoramento)
 - **UC05:** Consultar histórico de preços (Administrador)
 
-## Fluxo Batch Diário
+## Fluxo Batch Diário (Implementação Parcial)
 
-1. Detectar novas imagens no Google Drive.
-2. Se existirem novas imagens:
-    - Executar OCR via pytesseract.
-    - Realizar parser de texto (regex/heurísticas).
-    - Atualizar banco de dados.
-3. Se não existirem novas imagens:
-    - Aguardar próximo ciclo e voltar a detectar novas imagens.
+1.  Detectar novas imagens no Google Drive (Implementado).
+2.  Se existirem novas imagens:
+    *   Baixar a imagem (Implementado).
+    *   Executar OCR via pytesseract e exibir texto (Implementado).
+    *   Realizar parser de texto (regex/heurísticas) (Em desenvolvimento).
+    *   Atualizar banco de dados (Não implementado).
+3.  Se não existirem novas imagens:
+    *   Aguardar próximo ciclo e voltar a detectar novas imagens (Lógica básica implementada).
 
-## Fluxo Web App
+## Fluxo Web App (Não Implementado)
 
-1. Usuário acessa o site.
-2. Insere termo de pesquisa.
-3. Consulta o banco de dados.
-4. Exibe o histórico de preços.
+1.  Usuário acessa o site.
+2.  Insere termo de pesquisa.
+3.  Consulta o banco de dados.
+4.  Exibe o histórico de preços.
 
 ## Diagramas
 
 Os diagramas de casos de uso e fluxograma do sistema estão disponíveis na pasta `docs/`:
 - `docs/casos_de_uso.plantuml`
 - `docs/fluxograma.plantuml`
+- `docs/diagrama_mvc.plantuml` (Representa a arquitetura planejada para o Web App)
 
 Para visualizar os diagramas, utilize a extensão PlantUML no VS Code ou gere as imagens via terminal:
 
@@ -45,21 +65,22 @@ Para visualizar os diagramas, utilize a extensão PlantUML no VS Code ou gere as
 sudo apt-get install plantuml graphviz
 plantuml docs/casos_de_uso.plantuml
 plantuml docs/fluxograma.plantuml
+plantuml docs/diagrama_mvc.plantuml
 ```
 
-## Tecnologias Utilizadas
+## Tecnologias Utilizadas (e Planejadas)
 
-- **Python** (pytesseract para OCR)
+- **Python** (pytesseract para OCR, Flask/Django para Web App - planejado)
 - **PlantUML** (documentação dos fluxos)
 - **Google Drive API** (monitoramento de imagens)
-- **Banco de Dados** (armazenamento do histórico de preços)
+- **Banco de Dados** (SQLite, PostgreSQL, ou outro - a definir)
 - **Regex/Heurísticas** (parser de texto)
 
 ## Como Contribuir
 
-1. Faça um fork do repositório.
-2. Crie uma branch para sua feature ou correção.
-3. Envie um pull request.
+1.  Faça um fork do repositório.
+2.  Crie uma branch para sua feature ou correção.
+3.  Envie um pull request.
 
 ## Configuração do Google Drive API
 
@@ -96,15 +117,15 @@ Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive
 2. Crie uma pasta para armazenar as imagens das notas fiscais
 3. Clique com o botão direito na pasta > "Compartilhar"
 4. No campo de email, insira o email da conta de serviço
-5. Defina a permissão como "Leitor" 
+5. Defina a permissão como "Leitor"
 6. Desmarque a opção de notificação e clique em "Compartilhar"
 7. Obtenha o ID da pasta da URL (formato: `https://drive.google.com/drive/folders/SEU_FOLDER_ID_AQUI`)
 
 ### 6. Configurar variáveis de ambiente
 Para proteger suas credenciais, use variáveis de ambiente em vez de incluir diretamente no código:
 
-1. Converta o conteúdo do arquivo JSON das credenciais para uma string
-2. Configure as seguintes variáveis de ambiente:
+1.  Converta o conteúdo do arquivo JSON das credenciais para uma string única (removendo quebras de linha).
+2.  Configure as seguintes variáveis de ambiente:
 
 **Linux/macOS:**
 ```bash

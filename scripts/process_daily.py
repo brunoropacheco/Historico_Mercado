@@ -1,4 +1,5 @@
 import os
+import sys
 import datetime
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -6,6 +7,7 @@ from google.oauth2 import service_account
 import io
 import logging
 import json
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -112,20 +114,11 @@ def download_and_process_image(drive_service, file_id, file_name):
         logger.error(f"Error downloading file {file_id}: {str(e)}")
         return None
 
-def check_for_new_images(folder_id):
-    """Check for new images in the specified Google Drive folder"""
-    drive_service = authenticate_google_drive()
-    if not drive_service:
-        logger.error("Failed to authenticate with Google Drive")
-        return
-    
-    last_check_time = get_last_check_time()
-    logger.info(f"Checking for images modified after {last_check_time}")
-    
+def check_for_new_images_metadata(drive_service, folder_id, last_check_time):
+    """Checks for new images in the specified Google Drive folder and returns their metadata."""
+    logger.info(f"Checking for images created or moved after {last_check_time} in folder {folder_id}")
     try:
-        # Query for files in the specified folder that are images and were created/moved to the folder after last check
         query = f"'{folder_id}' in parents and mimeType contains 'image/' and createdTime > '{last_check_time}'"
-        #query = f"'{folder_id}' in parents"
         results = drive_service.files().list(
             q=query,
             spaces='drive',
@@ -133,41 +126,55 @@ def check_for_new_images(folder_id):
         ).execute()
         
         files = results.get('files', [])
-        #print(files)  # Debugging line to see the files fetched
-        
-        if not files:
-            logger.info("No new images found.")
-            update_last_check_time()
-            return
-        
-        logger.info(f"Found {len(files)} new images.")
-        
-        # Process each new image
-        for file in files:
-            file_id = file.get('id')
-            file_name = file.get('name')
-            
-            logger.info(f"Processing image: {file_name}")
-            download_and_process_image(drive_service, file_id, file_name)
-        
-        # Update the last check time
-        update_last_check_time()
+        return files # Return the list of file metadata
     
     except Exception as e:
-        logger.error(f"Error checking for new images: {str(e)}")
+        logger.error(f"Error checking for new images metadata: {str(e)}")
+        return [] # Return an empty list in case of error
 
 def main():
     """Main function to run the daily monitoring process"""
     logger.info("Starting daily monitoring process")
-    
-    # Replace with your actual Google Drive folder ID where receipts are uploaded
+
+    # Adiciona a pasta raiz do projeto (um nível acima da pasta 'scripts') ao sys.path
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    from src.controllers.process_controller import process_image
+  
+    # Ensure environment variables are set
     folder_id = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
     if not folder_id:
         logger.error("GOOGLE_DRIVE_FOLDER_ID environment variable not set")
         return
+
+    drive_service = authenticate_google_drive()
+    if not drive_service:
+        logger.error("Failed to authenticate with Google Drive. Exiting.")
+        return
+
+    last_check_time = get_last_check_time()
     
-    check_for_new_images(folder_id)
+    new_images_metadata = check_for_new_images_metadata(drive_service, folder_id, last_check_time)
     
+    if not new_images_metadata:
+        logger.info("No new images found.")
+    else:
+        logger.info(f"Found {len(new_images_metadata)} new image(s).")
+        for file_meta in new_images_metadata:
+            file_id = file_meta.get('id')
+            file_name = file_meta.get('name')
+            
+            if file_id and file_name:
+                logger.info(f"Processing image: {file_name} (ID: {file_id})")
+                file_path = download_and_process_image(drive_service, file_id, file_name)
+                structured = process_image(file_path)
+                print(json.dumps(structured, indent=2, ensure_ascii=False))
+                
+            else:
+                logger.warning(f"Skipping file with missing ID or name: {file_meta}")
+                
+    update_last_check_time()
     logger.info("Daily monitoring process completed")
 
 if __name__ == "__main__":

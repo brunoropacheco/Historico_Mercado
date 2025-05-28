@@ -97,6 +97,7 @@ pyasn1_modules==0.4.2
 pycparser==2.22
 Pygments==2.19.1
 pyparsing==3.2.1
+pytesseract==0.3.13
 python-dateutil==2.9.0.post0
 python-json-logger==3.3.0
 pytz==2025.1

@@ -1,3 +1,17 @@
+# ATENÇÃO: Para utilizar o pytesseract, é necessário ter o Tesseract OCR instalado na máquina.
+# pytesseract é apenas uma interface para o motor Tesseract.
+#
+# Instalação do Tesseract OCR e pacote de idioma Português (Exemplo para Debian/Ubuntu):
+# 1. Instalar o Tesseract OCR:
+#    sudo apt-get update
+#    sudo apt-get install tesseract-ocr
+#
+# 2. Instalar o pacote de idioma para Português:
+#    sudo apt-get install tesseract-ocr-por
+#
+# Para outros sistemas operacionais, consulte a documentação oficial do Tesseract.
+# Certifique-se de que o Tesseract está no PATH do sistema após a instalação.
+
 import pytesseract
 from PIL import Image
 import re

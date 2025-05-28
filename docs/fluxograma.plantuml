@@ -1,0 +1,24 @@
+@startuml fluxograma
+|Batch Diário|
+start
+:Detectar novas imagens no Google Drive;
+repeat
+  if (Existem novas imagens?) then (sim)
+    :Executar OCR via pytesseract;
+    :Parser de texto (regex/heurísticas);
+    :Atualizar banco de dados;
+    break
+  else (não)
+    :Aguardar próximo ciclo;
+  endif
+repeat while (Existem novas imagens? == não)
+stop
+
+|Web App|
+start
+:Usuário acessa site;
+:Insere termo de pesquisa;
+:Consultar banco de dados;
+:Exibir histórico de preços;
+stop
+@enduml

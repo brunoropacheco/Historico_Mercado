@@ -1,0 +1,24 @@
+@startuml model_dados
+entity compras {
+  * id                   : SERIAL
+  --
+  data                   : DATE
+  estabelecimento        : VARCHAR(200)
+  cnpj                   : VARCHAR(14)
+  total                  : NUMERIC(10,2)
+  nome_imagem_origem     : TEXT
+}
+
+entity itens_compra {
+  * id                : SERIAL
+  --
+  compra_id          : INTEGER
+  descricao          : TEXT
+  quantidade         : NUMERIC(10,3)
+  unidade            : VARCHAR(20)
+  preco_unitario     : NUMERIC(10,2)
+  preco_total        : NUMERIC(10,2)
+}
+
+compras ||--o{ itens_compra : contém
+@enduml

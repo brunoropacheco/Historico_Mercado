@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pt-br" lang="pt-br"><head id="j_idt2">
+<script type="text/javascript">
+(function(){
+window["loaderConfig"] = "/TSPD/?type=21";
+})();
+
+</script>
+
+<script type="text/javascript" src="/TSPD/?type=18"></script>
+
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Consulta DF-e</title>		
+		<script type="text/javascript" src="https://code.jquery.com/jquery-1.9.1.js"></script><script type="text/javascript" src="/consultaDFe/javax.faces.resource/jquery.mobile-1.4.5.min.js.faces?ln=js"></script>	
+		
+		<style>
+			
+			div#mensagemErro_content > div > div{
+				width: 60px;margin: 0px;
+			}
+			
+			.ui-loader {
+ 				 display:none !important;
+			}
+			
+			.ui-icon-loading {
+			    background:none !important;
+			}
+			
+		</style><link type="text/css" rel="stylesheet" href="/consultaDFe/javax.faces.resource/paginaDanfe.css.faces?ln=css" /><link type="text/css" rel="stylesheet" href="/consultaDFe/javax.faces.resource/jquery.mobile-1.4.5.min.css.faces?ln=css" /><link type="text/css" rel="stylesheet" href="/consultaDFe/javax.faces.resource/nfceMob.css.faces?ln=css" /><link type="text/css" rel="stylesheet" href="/consultaDFe/javax.faces.resource/nfceMob_ie.css.faces?ln=css" /><script type="text/javascript" src="/consultaDFe/javax.faces.resource/jsf.js.faces?ln=javax.faces"></script><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/jquery.js"></script><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/richfaces.js"></script><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/richfaces-base-component.js"></script><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/richfaces-event.js"></script><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/popupPanel.js"></script><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/popupPanelBorders.js"></script><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/popupPanelSizer.js"></script><link type="text/css" rel="stylesheet" href="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/popupPanel.ecss?db=eAETn3PiPwAEwwJ7" /><script type="text/javascript" src="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/message.js"></script><link type="text/css" rel="stylesheet" href="/consultaDFe/org.richfaces.resources/javax.faces.resource/org.richfaces/msg.ecss?db=eAETn3PiPwAEwwJ7" /></head><body>
+		<script type="text/javascript">
+			$(function(){
+				var notaCancelada = false;
+				var certlogin = '';
+		
+				if(certlogin != '') {
+					$("#download").click();	
+				}
+				
+				if(notaCancelada) {
+					$("#imgInvalido1").show();
+				}
+				
+				$('#linkMsg').click(function(event) {
+					$('#mensagem').toggle();
+		    	});
+				
+				$("#download").parent().hide();
+				
+			});
+		</script>
+		
+		<div id="containerSis">
+			
+			<div class="contentForm">
+<form id="formulario" name="formulario" method="post" action="/consultaDFe/paginas/resultadoNfce.faces?cid=1" enctype="ISO-8859-1" target="_self">
+<input type="hidden" name="formulario" value="formulario" />
+<input id="download" type="submit" name="download" value="" style="display: none;" />
+			  		
+			  		<div id="cont-botoes" style="background-color:white;position: relative; display: block;z-index: 50;">
+				  		
+				  		<div id="menu_botoes" class="pad_10"><input type="image" src="../resources/images/bt_NovaConsulta.png" name="j_idt14" alt="Nova consulta" title="Nova consulta" class="bot_consulta imgBtConsulta mB_12" /><input type="image" src="../resources/images/bt_ico_nova_consulta.png" name="j_idt15" alt="Nova consulta" title="Nova consulta" class="imgIcoConsulta" /><input type="image" src="../resources/images/bt_consultaCompleta_semCert.png" name="j_idt16" alt="Visualizar NFC-e detalhada" title="Visualizar NFC-e detalhada" class="bot_consulta imgBtDetalhada mB_12" /><input type="image" src="../resources/images/bt_ico_nota_detalhada.png" name="j_idt17" alt="Visualizar NFC-e detalhada" title="Visualizar NFC-e detalhada" class="bot_consulta imgIcoDetalhada" /><a href="/consultaDFe/paginas/resultadoNfce.faces?certlogin=1"><img src="../resources/images/bt_download.png" alt="Baixar nota" title="Baixar nota" class="imgBtDownload" /></a><a href="/consultaDFe/paginas/resultadoNfce.faces?certlogin=1"><img src="../resources/images/bt_ico_download.png" alt="Baixar nota" title="Baixar nota" class="imgIcoDownload" /></a>
+							
+						<div class="fRight"> 
+							<a href="javascript:window.print();">
+								<img src="../resources/images/bt_imprimir_doc.png" alt="Nota fiscal de consumidor eletrônica" border="0" title="Nota fiscal de consumidor eletrônica" class="imgBtImprimir" />
+								<img src="../resources/images/bt_ico_imprimir_nota.png" alt="Nota fiscal de consumidor eletrônica" border="0" title="Nota fiscal de consumidor eletrônica" class="imgIcoImprimir" />
+							</a>
+						</div>
+							
+					  	</div>
+						
+						<div id="avisoTopo" style="text-align:center; padding:10px;">Confira as informações da sua compra na NFC-e abaixo.</div>
+				
+					</div><input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:0" value="-6447156902808551201:2468426359598486318" autocomplete="off" />
+</form>
+				
+			</div><div id="mensagemErro" style="visibility: hidden;"><div class="rf-pp-shade" id="mensagemErro_shade" style="z-index:100;"><button class="rf-pp-btn" id="mensagemErroFirstHref" name="mensagemErrofirstHref"></button></div><div class="rf-pp-cntr " id="mensagemErro_container" style="position: fixed; z-index:100; "><div class="rf-pp-shdw" id="mensagemErro_shadow"></div><div class="rf-pp-hdr " id="mensagemErro_header"><div class="rf-pp-hdr-cnt" id="mensagemErro_header_content">
+				<div style="width: 100%; float: left;">
+					
+					<div style="width: 10%; float: right; cursor: pointer; text-align: right; padding-right: 10px;" onclick="RichFaces.component('mensagemErro').hide();">X</div>
+				</div></div></div><div class="rf-pp-cnt-scrlr" id="mensagemErro_content_scroller"><div class="rf-pp-cnt" id="mensagemErro_content"><span class="rf-msgs " id="areaDeMensagens" style="margin-top: 30px;"></span>
+			<div align="center" style="bottom: 30px; position: absolute; width: 100%">
+				<br />
+				<input type="button" value="Fechar" onclick="RichFaces.component('mensagemErro').hide();" class="btoGeral" />
+				<br />
+			</div></div></div><div class="rf-pp-hndlr  rf-pp-hndlr-l" id="mensagemErroResizerW"></div><div class="rf-pp-hndlr rf-pp-hndlr-r" id="mensagemErroResizerE"></div><div class="rf-pp-hndlr rf-pp-hndlr-t" id="mensagemErroResizerN"></div><div class="rf-pp-hndlr rf-pp-hndlr-b" id="mensagemErroResizerS"></div><div class="rf-pp-hndlr rf-pp-hndlr-tl" id="mensagemErroResizerNW"></div><div class="rf-pp-hndlr rf-pp-hndlr-tr" id="mensagemErroResizerNE"></div><div class="rf-pp-hndlr rf-pp-hndlr-bl" id="mensagemErroResizerSW"></div><div class="rf-pp-hndlr rf-pp-hndlr-br" id="mensagemErroResizerSE"></div></div><script type="text/javascript">new RichFaces.ui.PopupPanel("mensagemErro",{"minHeight":95,"minWidth":500,"resizeable":true} );</script></div>
+
+		<script>
+   			// VERIFICA SE HA MENSAGEM PARA SER EXIBIDA
+   			if( $("#areaDeMensagens").text()!="" ) {
+   				RichFaces.component('mensagemErro').show();
+			}
+   		</script>
+			
+		</div>
+			<div style="position:relative;"><div xmlns:r="http://www.serpro.gov.br/nfe/remessanfe.xsd" xmlns:chave="http://exslt.org/chaveacesso" xmlns:n="http://www.portalfiscal.inf.br/nfe" data-role="header">
+<h1 class="tit">
+<img alt="NFC-e" height="64" width="112" src="../resources/images/logoNFCe.png"><p>DOCUMENTO AUXILIAR DA NOTA FISCAL DE CONSUMIDOR ELETR&Ocirc;NICA</p>
+<p></p>
+</h1>
+</div><div data-role="content">
+<div id="conteudo">
+<div id="avisos"></div>
+<div class="txtCenter">
+<div class="txtTopo" id="u20">TECNOPHARMA FARM?CIA DE MANIPULA??O LTDA</div>
+<div class="text">
+								CNPJ:
+								31.575.186/0032-37</div>
+<div class="text">RUA CORREA DUTRA
+							,
+							105
+							,
+							
+							,
+							FLAMENGO
+							,
+							RIO DE JANEIRO
+							,
+							RJ</div>
+</div>
+<table data-filter="true" id="tabResult" cellspacing="0" cellpadding="0" align="center" border="0">
+<tr id="Item + 1">
+<td valign="top"><span class="txtTit">FORMULA MANIPULADA</span><span class="RCod">
+										(C&oacute;digo:
+										4007
+										)
+									</span>
+<br>
+<span class="Rqtd"><strong>Qtde.:</strong>1</span><span class="RUN"><strong>UN: </strong>UN</span><span class="RvlUnit"><strong>Vl. Unit.:</strong>
+										&nbsp;
+										185,4</span></td><td class="txtTit noWrap" valign="top" align="right">
+									Vl. Total
+									<br>
+<span class="valor">185,40</span></td>
+</tr>
+<tr id="Item + 2">
+<td valign="top"><span class="txtTit">TAXA DE  ENTREGA LOJA</span><span class="RCod">
+										(C&oacute;digo:
+										8888
+										)
+									</span>
+<br>
+<span class="Rqtd"><strong>Qtde.:</strong>1</span><span class="RUN"><strong>UN: </strong>UN</span><span class="RvlUnit"><strong>Vl. Unit.:</strong>
+										&nbsp;
+										12</span></td><td class="txtTit noWrap" valign="top" align="right">
+									Vl. Total
+									<br>
+<span class="valor">12,00</span></td>
+</tr>
+</table>
+<div class="txtRight" id="totalNota">
+<div id="linhaTotal">
+<label>Qtd. total de itens:</label><span class="totalNumb">2</span>
+</div>
+<div id="linhaTotal">
+<label>Valor total R$:</label><span class="totalNumb">197,40</span>
+</div>
+<div id="linhaTotal">
+<label>Descontos R$:</label><span class="totalNumb">37,08</span>
+</div>
+<div class="linhaShade" id="linhaTotal">
+<label>Valor a pagar R$:</label><span class="totalNumb txtMax">160,32</span>
+</div>
+<div id="linhaForma">
+<label>Forma de pagamento:</label><span class="totalNumb txtTitR">Valor pago R$:</span>
+</div>
+<div id="linhaTotal">
+<label class="tx">
+											Cart&atilde;o de Cr&eacute;dito
+										</label><span class="totalNumb">160,32</span>
+</div>
+<div id="linhaTotal"></div>
+<div class="spcTop" id="linhaTotal">
+<label class="txtObs">Informa&ccedil;&atilde;o dos Tributos Totais Incidentes
+									(Lei Federal 12.741/2012)&nbsp;R$</label><span class="totalNumb txtObs">17,79</span>
+</div>
+</div>
+</div>
+<div class="txtCenter" id="infos">
+<div data-collapsed="false" data-expanded-icon="carat-u" data-collapsed-icon="carat-d" data-role="collapsible">
+<h4>Informa&ccedil;&otilde;es gerais da Nota</h4>
+<ul data-inset="false" data-role="listview">
+<li>
+<strong>EMITIDA EM CONTING&Ecirc;NCIA</strong>
+<br>
+<br>
+<strong>N&uacute;mero: </strong>109913<strong> S&eacute;rie: </strong>4<strong> Emiss&atilde;o: </strong>29/05/2025 14:57:18-03:00
+								- Via Consumidor 2
+								<br>
+<br>
+<strong>Protocolo de Autoriza&ccedil;&atilde;o: </strong>233251258370202       29/05/2025 
+        &agrave;s
+      15:12:19-03:00<br>
+<br>
+<strong>
+										Ambiente de Produ&ccedil;&atilde;o -
+									
+									Vers&atilde;o XML:
+									4.00
+									- Vers&atilde;o XSLT: 2.07
+								</strong>
+</li>
+</ul>
+</div>
+<div data-collapsed="false" data-expanded-icon="carat-u" data-collapsed-icon="carat-d" data-role="collapsible">
+<h4>Chave de acesso</h4>
+<ul data-inset="false" data-role="listview">
+<li>
+								Consulte pela Chave de Acesso em
+								
+								http://www4.fazenda.rj.gov.br/consultaDFe/paginas/consultaChaveAcesso.faces<br>
+<br>
+<strong>Chave de acesso:</strong>
+<br>
+<span class="chave">3325 0531 5751 8600 3237 6500 4000 1099 1393 9232 0108</span>
+</li>
+</ul>
+</div>
+<div data-collapsed="false" data-expanded-icon="carat-u" data-collapsed-icon="carat-d" data-role="collapsible">
+<h4>Consumidor</h4>
+<ul data-inset="false" data-role="listview">
+<li>
+<strong>CPF: </strong>117.569.687-05</li>
+<li>
+<strong>Nome: </strong>
+</li>
+</ul>
+</div>
+<div data-collapsed="false" data-expanded-icon="carat-u" data-collapsed-icon="carat-d" data-role="collapsible">
+<h4>Informa&ccedil;&otilde;es de interesse do contribuinte</h4>
+<ul data-inset="false" data-role="listview">
+<li>CX:CATETE 2   OP:2243 VND:157822 Trib. Aprox.: 8,22 Fed; 2,16 Est; 7,42 Mun;  FONTE: 0</li>
+</ul>
+</div>
+</div>
+</div>
+
+			</div>
+		
+		<p id="rodape">Data/Hora da Consulta: 03/06/2025 09:38:19</p>
+		
+		<p> </p>
+		
+		<div id="footer" style="margin-bottom: 10px;">
+			<p> </p>
+		  	<p> </p>
+		</div><script type="text/javascript" src="/consultaDFe/javax.faces.resource/index.js.faces?ln=js"></script><script type="text/javascript">RichFaces.jQuery(document).ready(function() {
+new RichFaces.ui.Message("areaDeMensagens",{"globalOnly":true,"isMessages":true} )
+});
+</script></body>
+	<!-- versao:  -->
+	<!-- 2 -->
+</html>

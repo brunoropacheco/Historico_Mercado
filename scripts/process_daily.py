@@ -7,6 +7,8 @@ from google.oauth2 import service_account
 import io
 import logging
 import json
+from pegar_chave import extrair_chave
+from pegar_dados_cupom import extrair_dados_cupom
 
 
 # Setup logging
@@ -140,7 +142,6 @@ def main():
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
-    from src.controllers.process_controller import process_image
   
     # Ensure environment variables are set
     folder_id = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
@@ -168,9 +169,17 @@ def main():
             if file_id and file_name:
                 logger.info(f"Processing image: {file_name} (ID: {file_id})")
                 file_path = download_and_process_image(drive_service, file_id, file_name)
-                structured = process_image(file_path)
-                print(json.dumps(structured, indent=2, ensure_ascii=False))
-                
+                chave = extrair_chave(file_path)
+                if chave:
+                    logger.info(f"Chave de acesso extraída: {chave}")
+                    # Aqui você poderia adicionar lógica para salvar a chave ou processar mais
+                    dados_cupom = extrair_dados_cupom(chave)
+                    if dados_cupom:
+                        logger.info(f"Dados do cupom extraídos: {dados_cupom}")
+                    else:
+                        logger.warning(f"Não foi possível extrair dados do cupom para a chave: {chave}")
+                else:
+                    logger.warning(f"Chave de acesso não encontrada na imagem: {file_name}")                                
             else:
                 logger.warning(f"Skipping file with missing ID or name: {file_meta}")
                 

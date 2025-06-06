@@ -1,7 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-
+import datetime
+import os
 
 
 def extrair_dados_cupom(chave_original):
@@ -24,7 +25,7 @@ def extrair_dados_cupom(chave_original):
                 chave_formatada += "+"
             chave_formatada += chave_original[i:i+4]
 
-        print(f"Chave formatada: {chave_formatada}")
+        #print(f"Chave formatada: {chave_formatada}")
 
         # Configurar um User-Agent válido
         headers = {
@@ -68,12 +69,12 @@ def extrair_dados_cupom(chave_original):
             raise Exception("ViewState não encontrado")
         
         view_state = view_state_element['value']
-        print(f"ViewState capturado: {view_state}")
+        #print(f"ViewState capturado: {view_state}")
         
         # Mostrar cookies capturados
-        print("Cookies capturados:")
-        for cookie in session.cookies:
-            print(f"  {cookie.name}: {cookie.value}")
+        #print("Cookies capturados:")
+        #for cookie in session.cookies:
+        #    print(f"  {cookie.name}: {cookie.value}")
         
         # Passo 2: Preparar o payload do POST
         payload = (
@@ -93,7 +94,7 @@ def extrair_dados_cupom(chave_original):
         
         response_post = session.post(url, data=payload, headers=post_headers)
         
-        print(f"Status Code: {response_post.status_code}")
+        print(f"Status Code da resposta da requisicao POST: {response_post.status_code}")
         
         # Passo 4: Verificar se a resposta contém resultado ou pede CAPTCHA
         if "captcha" in response_post.text.lower() or "código da imagem" in response_post.text.lower():
@@ -104,8 +105,8 @@ def extrair_dados_cupom(chave_original):
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(response_post.text)
         
-        print("\nPrimeiros 500 caracteres da resposta:")
-        print(response_post.text[:500])
+        #print("\nPrimeiros 500 caracteres da resposta:")
+        #print(response_post.text[:500])
         print("\nResposta completa salva em 'resposta_consulta.html'")
         
         # Extrair dados do HTML recém-baixado
@@ -116,7 +117,6 @@ def extrair_dados_cupom(chave_original):
         print("Tentando usar o arquivo HTML existente...")
         
         # Verificar se o arquivo HTML existe
-        import os
         if os.path.exists(html_path):
             print(f"Usando arquivo HTML existente: {html_path}")
             try:
@@ -144,7 +144,13 @@ def extrair_dados_html(path_html):
 
     # Endereço
     endereco_div = cnpj_div.find_next('div', class_='text') if cnpj_div else None
-    endereco = ' '.join(endereco_div.stripped_strings) if endereco_div else ''
+    if endereco_div:
+        # Pegar o texto completo e normalizar os espaços
+        endereco_raw = endereco_div.get_text()
+        # Substituir quebras de linha, tabs e múltiplos espaços por um espaço único
+        endereco = re.sub(r'\s+', ' ', endereco_raw).strip()
+    else:
+        endereco = ''
 
     # Itens detalhados da compra
     itens = []
@@ -221,11 +227,74 @@ def extrair_dados_html(path_html):
             if match:
                 data_compra = match.group(1)
                 break
+    # Converter data_compra para datetime.date
+    data_compra_date = None
+    if data_compra:
+        try:
+            data_compra = datetime.datetime.strptime(data_compra, "%d/%m/%Y").date()
+        except ValueError:
+            data_compra = None
+    
+    # Valor total da compra (NOVO CÓDIGO)
+    total_compra = None
+    
+    # Método 1: Procurar por elementos com texto específico
+    total_spans = soup.find_all(['span', 'div', 'td'], 
+                              string=re.compile(r'(valor\s+total|total\s+r\$|valor\s+a\s+pagar)', re.I))
+    
+    for span in total_spans:
+        # Tenta extrair valor do próprio elemento
+        valor_match = re.search(r'R?\$?\s*(\d+[,.]\d+)', span.get_text())
+        if valor_match:
+            total_compra = valor_match.group(1).replace('.', '').replace(',', '.')
+            break
+        
+        # Se não encontrou no elemento, procura no próximo irmão ou pai
+        next_el = span.find_next(['span', 'div'])
+        if next_el:
+            valor_match = re.search(r'R?\$?\s*(\d+[,.]\d+)', next_el.get_text())
+            if valor_match:
+                total_compra = valor_match.group(1).replace('.', '').replace(',', '.')
+                break
+    
+    # Método 2: Última linha da tabela de itens (geralmente contém o total)
+    if not total_compra and tabela:
+        ultima_linha = tabela.find_all('tr')[-1]
+        if ultima_linha:
+            valor_match = re.search(r'R?\$?\s*(\d+[,.]\d+)', ultima_linha.get_text())
+            if valor_match:
+                total_compra = valor_match.group(1).replace('.', '').replace(',', '.')
+    
+    # Método 3: Somar os valores individuais dos itens
+    if not total_compra and itens:
+        # Tenta somar os valores individuais
+        soma = 0
+        for item in itens:
+            if item['valor']:
+                try:
+                    valor_limpo = item['valor'].replace('R$', '').replace(' ', '').replace('.', '').replace(',', '.')
+                    soma += float(valor_limpo)
+                except ValueError:
+                    continue
+        if soma > 0:
+            total_compra = str(soma)
+    
+    # Converter para float se encontrou um valor
+    total_compra_float = None
+    if total_compra:
+        try:
+            total_compra_float = float(total_compra)
+            print(f'Total da compra: R$ {total_compra_float:.2f}')
+        except ValueError:
+            print(f'Total da compra (não convertido): {total_compra}')
+    else:
+        print('Total da compra não encontrado')
 
     return {
         'nome_empresa': nome_empresa,
         'cnpj': cnpj,
         'endereco': endereco,
-        'data_compra': data_compra,
+        'data': data_compra,
+        'total': total_compra_float,  # Adiciona o total ao retorno
         'itens_compra': itens
     }

@@ -58,17 +58,39 @@ def get_last_check_time():
             if timestamp:
                 return timestamp
     
-    # If no last check or file doesn't exist, return a time 24 hours ago
-    # Use timezone-aware UTC datetime
-    yesterday = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
-    return yesterday
+    # Criar timezone de Brasília (UTC-3)
+    brasilia_tz = datetime.timezone(datetime.timedelta(hours=-3))
+    
+    # Obter data atual em Brasília
+    now_brasilia = datetime.datetime.now(brasilia_tz)
+    
+    # Se não houver último check, retornar 7 dias atrás no horário de Brasília
+    # mas convertido para UTC para compatibilidade com a API Google Drive
+    seven_days_ago_brasilia = now_brasilia - datetime.timedelta(days=7)
+    
+    # Converter para UTC (para a API do Google)
+    seven_days_ago_utc = seven_days_ago_brasilia.astimezone(datetime.timezone.utc)
+    
+    return seven_days_ago_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
 
 def update_last_check_time():
     """Update the timestamp of the last folder check"""
-    now = datetime.datetime.now(datetime.timezone.utc).isoformat('T') + 'Z'
+    # Criar timezone de Brasília (UTC-3)
+    brasilia_tz = datetime.timezone(datetime.timedelta(hours=-3))
+    
+    # Obter data atual em Brasília
+    now_brasilia = datetime.datetime.now(brasilia_tz)
+    
+    # Converter para UTC para compatibilidade com a API
+    now_utc = now_brasilia.astimezone(datetime.timezone.utc)
+    
+    # Salvar no formato ISO com Z
+    timestamp = now_utc.isoformat('T') + 'Z'
+    
     with open(LAST_CHECK_FILE, 'w') as f:
-        f.write(now)
-    return now
+        f.write(timestamp)
+    
+    return timestamp
 
 def is_receipt_image(file):
     """Check if the file is likely a receipt image based on mime type"""
@@ -142,6 +164,7 @@ def main():
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
+    from src.controllers.process_controller import salvar_dados_nota
   
     # Ensure environment variables are set
     folder_id = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
@@ -172,10 +195,14 @@ def main():
                 chave = extrair_chave(file_path)
                 if chave:
                     logger.info(f"Chave de acesso extraída: {chave}")
+                    logger.info(f"Extraindo dados do cupom via site SEFAZ")
                     # Aqui você poderia adicionar lógica para salvar a chave ou processar mais
                     dados_cupom = extrair_dados_cupom(chave)
                     if dados_cupom:
                         logger.info(f"Dados do cupom extraídos: {dados_cupom}")
+                        salvar_dados_nota(dados_cupom)
+                        logger.info(f"Dados do cupom salvos com sucesso para a chave: {chave}")
+                        
                     else:
                         logger.warning(f"Não foi possível extrair dados do cupom para a chave: {chave}")
                 else:

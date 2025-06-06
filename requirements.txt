@@ -9,6 +9,7 @@ google-auth==2.40.2
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.2
 googleapis-common-protos==1.70.0
+greenlet==3.2.2
 httplib2==0.22.0
 idna==3.10
 numpy==2.2.6
@@ -24,6 +25,7 @@ requests==2.32.3
 requests-oauthlib==2.0.0
 rsa==4.9.1
 soupsieve==2.7
+SQLAlchemy==2.0.41
 typing_extensions==4.14.0
 uritemplate==4.2.0
 urllib3==2.4.0

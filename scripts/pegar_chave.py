@@ -74,7 +74,7 @@ def extrair_chave(image_path):
             if len(chave_candidata) == 44:
                 # Formato legível para visualização
                 chave_formatada = ' '.join([chave_candidata[i:i+4] for i in range(0, len(chave_candidata), 4)])
-                print(f"✅ Chave válida extraída do QR code: {chave_formatada}")
+                #print(f"✅ Chave válida extraída do QR code: {chave_formatada}")
                 return chave_candidata
     
     # Se não encontrou pelos padrões, mas o QR code contém uma sequência de 44 dígitos

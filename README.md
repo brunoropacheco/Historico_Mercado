@@ -149,39 +149,25 @@ Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive
 
     Para desenvolvimento, crie um arquivo `.env` na raiz do projeto com estas variáveis (não esqueça de adicionar `.env` ao `.gitignore`).
 
-### Configuração do Tesseract OCR
+## Dependências do Sistema (Linux)
 
-Para a extração de texto de imagens (OCR), este projeto utiliza a biblioteca `pytesseract`, que é uma interface para o motor Tesseract OCR. É necessário instalar o Tesseract OCR no seu sistema operacional, bem como os pacotes de idioma desejados.
+Antes de instalar as dependências Python, instale as bibliotecas do sistema necessárias:
 
-1.  **Instalar a biblioteca Python `pytesseract`**:
-    ```bash
-    pip install pytesseract
-    ```
+```sh
+sudo apt-get update
+sudo apt-get install libgl1 libzbar0
+```
 
-2.  **Instalar o motor Tesseract OCR**:
-    *   **Linux (Debian/Ubuntu):**
-        ```bash
-        sudo apt-get update
-        sudo apt-get install tesseract-ocr
-        ```
-    *   **Linux (Fedora):**
-        ```bash
-        sudo dnf install tesseract
-        ```
-    *   **macOS (usando Homebrew):**
-        ```bash
-        brew install tesseract
-        ```
-    *   **Windows:**
-        Baixe o instalador na [página de downloads do Tesseract no GitHub](https://github.com/UB-Mannheim/tesseract/wiki). Durante a instalação, adicione o Tesseract ao PATH do sistema e selecione os pacotes de idioma.
+Essas bibliotecas são necessárias para o funcionamento do OpenCV (`cv2`) e do `pyzbar`.
 
-3.  **Instalar Pacotes de Idioma para Tesseract (Exemplo: Português)**:
-    O projeto está configurado para usar o idioma português (`por`).
-    *   **Linux (Debian/Ubuntu):**
-        ```bash
-        sudo apt-get install tesseract-ocr-por
-        ```
-    *   **Outros Sistemas:** Consulte a documentação do Tesseract ou as opções do instalador para adicionar pacotes de idioma. O arquivo de dados para português é geralmente `por.traineddata`.
+> **Nota:** O `pytesseract` não é mais necessário para este projeto.
 
-4.  **Verificação**:
-    Após a instalação, abra um terminal e digite `tesseract --version`. Se o comando for reconhecido, o Tesseract está instalado e no PATH do sistema.
+## Inicialização do Banco de Dados
+
+Antes de executar o sistema pela primeira vez, é necessário criar o banco de dados SQLite. Para isso, execute o script de inicialização:
+
+```sh
+python scripts/init_db.py
+```
+
+Esse comando irá criar o arquivo do banco de dados com as tabelas necessárias para o funcionamento do projeto.

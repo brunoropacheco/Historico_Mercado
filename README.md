@@ -14,13 +14,15 @@ Atualmente, o projeto encontra-se em fase inicial de desenvolvimento. As seguint
 
 *   **Monitoramento de Pasta no Google Drive:** O script `scripts/process_daily.py` consegue monitorar uma pasta especificada no Google Drive em busca de novas imagens.
 *   **Download de Imagens:** Novas imagens detectadas são baixadas para a pasta local `data/images`.
-*   **Extração Básica de Dados com OCR:** Utilizando `pytesseract`, o sistema realiza a extração de texto de imagens de notas fiscais.
-*   **Exibição de Dados Extraídos:** Os dados brutos extraídos pelo OCR e algumas informações básicas da imagem (nome, tamanho, data) são printados no console.
+*   **Extração de Chave de Acesso via QR Code:** O sistema identifica e extrai a chave de acesso NFC-e a partir do QR code presente nas imagens de notas fiscais.
+*   **Consulta Automatizada à SEFAZ:** Utilizando a chave obtida, o sistema consulta o portal da Secretaria da Fazenda para extrair dados detalhados do cupom fiscal.
+*   **Persistência de Dados:** Os dados extraídos das notas fiscais (estabelecimento, valor total, itens) são salvos em um banco de dados SQLite local para consultas posteriores.
+*   **Exibição de Dados Extraídos:** Os dados estruturados da nota fiscal e informações básicas da imagem são exibidos no console.
 
 **Funcionalidades Ainda Não Implementadas / Em Desenvolvimento:**
 
-*   Parser robusto e estruturação completa dos dados da nota fiscal (itens, preços, estabelecimento, etc.).
-*   Integração com banco de dados para armazenamento do histórico de preços.
+*   Refinamento do parser para extração de dados mais complexos (descrições padronizadas, categorização de produtos).
+*   Otimização do acesso à SEFAZ para lidar com restrições de acesso.
 *   Desenvolvimento do Web App para consulta dos dados.
 *   Automação completa do processo batch (agendamento, tratamento de erros robusto).
 
@@ -39,9 +41,10 @@ O objetivo é evoluir para um sistema completamente automatizado e com uma inter
 1.  Detectar novas imagens no Google Drive (Implementado).
 2.  Se existirem novas imagens:
     *   Baixar a imagem (Implementado).
-    *   Executar OCR via pytesseract e exibir texto (Implementado).
-    *   Realizar parser de texto (regex/heurísticas) (Em desenvolvimento).
-    *   Atualizar banco de dados (Não implementado).
+    *   Extrair chave de acesso via QR code (Implementado).
+    *   Consultar site da SEFAZ usando a chave extraída (Implementado).
+    *   Fazer parse dos dados retornados (Implementado parcialmente).
+    *   Salvar dados estruturados no banco SQLite (Implementado parcialmente).
 3.  Se não existirem novas imagens:
     *   Aguardar próximo ciclo e voltar a detectar novas imagens (Lógica básica implementada).
 
@@ -71,11 +74,13 @@ plantuml docs/diagrama_mvc.plantuml
 ## Tecnologias Utilizadas (e Planejadas)
 
 - **Python** (pytesseract para OCR, Flask/Django para Web App - planejado)
+- **SQLite** (banco de dados local para armazenamento e testes)
 - **PlantUML** (documentação dos fluxos)
 - **Google Drive API** (monitoramento de imagens)
 - **Tesseract OCR** (motor de reconhecimento óptico de caracteres)
 - **Banco de Dados** (SQLite, PostgreSQL, ou outro - a definir)
-- **Regex/Heurísticas** (parser de texto)
+- **Regex/BeautifulSoup** (parser de HTML para extração de dados)
+- *Flask/Django* (Web App - planejado)
 
 ## Como Contribuir
 

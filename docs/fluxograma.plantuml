@@ -4,9 +4,14 @@ start
 :Detectar novas imagens no Google Drive;
 repeat
   if (Existem novas imagens?) then (sim)
-    :Executar OCR via pytesseract;
-    :Parser de texto (regex/heurísticas);
-    :Atualizar banco de dados;
+    :Executar OCR via pytesseract para 
+    extrair texto do cumpom fiscal;
+    :Parser de texto extrai chave de acesso
+    do texto extraido do cupom;
+    :Consultar chave de acesso no site
+    da SEFAZ e extrair dados do cupom;
+    :Atualizar banco de dados com dados
+    do cupom fiscal;
     break
   else (não)
     :Aguardar próximo ciclo;

@@ -5,7 +5,7 @@ Este projeto automatiza o processo de extração e análise de dados de notas fi
 ## Visão Geral
 
 O sistema é composto por dois principais módulos:
-- **Batch Diário:** Responsável por monitorar uma pasta no Google Drive, detectar novas imagens de notas fiscais, processar as imagens com OCR, extrair os dados relevantes e atualizar o banco de dados.
+- **Batch Diário:** Responsável por monitorar uma pasta no Google Drive, detectar novas imagens de notas fiscais, processar as imagens com OCR, extrair chave do qr code do cupom, consultar sefaz e atualizar o banco de dados.
 - **Web App:** Permite ao usuário consultar o histórico de preços de produtos a partir dos dados extraídos.
 
 ## Status do Projeto (Versão 0.1.0 - Em Desenvolvimento)
@@ -22,9 +22,11 @@ Atualmente, o projeto encontra-se em fase inicial de desenvolvimento. As seguint
 **Funcionalidades Ainda Não Implementadas / Em Desenvolvimento:**
 
 *   Refinamento do parser para extração de dados mais complexos (descrições padronizadas, categorização de produtos).
+*   Ajustar o tipo da variavel quantidade para poder ser decimal no caso de produtos por quilo
 *   Otimização do acesso à SEFAZ para lidar com restrições de acesso.
 *   Desenvolvimento do Web App para consulta dos dados.
 *   Automação completa do processo batch (agendamento, tratamento de erros robusto).
+*   Melhoramento da imagem para ter mais chances de obter o qr code
 
 O objetivo é evoluir para um sistema completamente automatizado e com uma interface web funcional.
 
@@ -55,6 +57,46 @@ O objetivo é evoluir para um sistema completamente automatizado e com uma inter
 3.  Consulta o banco de dados.
 4.  Exibe o histórico de preços.
 
+## Fluxo de Processamento
+
+O sistema agora funciona com o seguinte fluxo:
+
+1. Busca imagens na pasta do Google Drive definida pela variável de ambiente `GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID`
+2. Processa cada imagem:
+   - Extrai a chave do QR code
+   - Consulta os dados da nota fiscal via SEFAZ
+   - Salva os dados no banco SQLite
+3. Move a imagem processada para a pasta `GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID` 
+4. Exclui a imagem temporária do servidor local
+
+### Tolerância a Falhas
+
+O sistema foi melhorado para lidar com erros sem interromper o processamento:
+- Se não conseguir ler o QR code de uma imagem, passa para a próxima
+- Qualquer erro durante o processamento é registrado no log e o sistema continua
+- As imagens com erro também são movidas para a pasta de tratados
+
+## Boas Práticas para Captura de Imagens
+
+Para melhor eficiência do sistema:
+
+- Tire foto apenas do QR code da nota fiscal
+- Certifique-se de que o QR code esteja bem visível e não deformado
+- Evite reflexos, sombras ou obstruções no QR code
+- Mantenha a câmera estável ao fotografar
+
+## Configuração das Pastas
+
+Configure as seguintes variáveis de ambiente adicionais:
+
+```sh
+# Pasta onde serão colocadas as novas notas fiscais
+export GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID='id-da-pasta-de-novas-notas'
+
+# Pasta para onde as notas serão movidas após processamento
+export GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID='id-da-pasta-de-notas-tratadas'
+```
+
 ## Diagramas
 
 Os diagramas de casos de uso e fluxograma do sistema estão disponíveis na pasta `docs/`:
@@ -67,7 +109,7 @@ Para visualizar os diagramas, utilize a extensão PlantUML no VS Code ou gere as
 ```sh
 sudo apt-get install plantuml graphviz
 plantuml docs/casos_de_uso.plantuml
-plantuml docs/fluxograma.plantuml
+plantuml docs/fluxograma.plplantuml
 plantuml docs/diagrama_mvc.plantuml
 ```
 

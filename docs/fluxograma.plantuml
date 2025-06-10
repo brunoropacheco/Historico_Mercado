@@ -1,22 +1,20 @@
 @startuml fluxograma
 |Batch Diário|
 start
-:Detectar novas imagens no Google Drive;
-repeat
-  if (Existem novas imagens?) then (sim)
-    :Executar OCR via pytesseract para 
-    extrair texto do cumpom fiscal;
-    :Parser de texto extrai chave de acesso
-    do texto extraido do cupom;
-    :Consultar chave de acesso no site
-    da SEFAZ e extrair dados do cupom;
-    :Atualizar banco de dados com dados
-    do cupom fiscal;
-    break
+:Acessar pasta NotasNovas;
+if (Existem novas imagens?) then (sim)
+  if (Ainda ha imagens a serem processadas?) then (sim)
+    :Executar pyzbar para extrair o qr code da imagem;
+    :Extrair a chave de acesso do link do qr code;
+    :Consultar chave de acesso no site da SEFAZ e extrair dados do cupom;
+    :Atualizar banco de dados com dados do cupom fiscal;
+    :Mover imagem processada para a pasta NotasTratadas;
   else (não)
-    :Aguardar próximo ciclo;
+    :Terminar;
   endif
-repeat while (Existem novas imagens? == não)
+else (não)
+  :Aguardar próximo ciclo;
+endif
 stop
 
 |Web App|

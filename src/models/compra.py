@@ -39,6 +39,23 @@ class Compra(Base):
         )
         return compra.salvar()
 
+    @classmethod
+    def buscar_por_id(cls, compra_id):
+        """
+        Busca uma compra específica pelo seu ID.
+        
+        Args:
+            compra_id (int): O ID da compra a ser buscada
+            
+        Returns:
+            Compra: A instância da compra encontrada ou None se não existir
+        """
+        session = SessionLocal()
+        try:
+            return session.query(cls).filter(cls.id == compra_id).first()
+        finally:
+            session.close()
+
 # Caminho absoluto para o banco de dados
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'data', 'database', 'db.sqlite3')}"

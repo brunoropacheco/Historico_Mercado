@@ -5,6 +5,10 @@ e inserir as informações no banco de dados, utilizando os models de Compra e I
 
 from src.models.compra import Compra
 from src.models.item_compra import ItemCompra
+import logging
+
+# Configuração de logging se ainda não existir
+logger = logging.getLogger(__name__)
 
 def salvar_dados_nota(dados_nota):
     """
@@ -43,3 +47,134 @@ def salvar_dados_nota(dados_nota):
         item_compra.salvar()  # Método do model ItemCompra para inserir no banco
     
     return compra.id  # Retorna o id da compra salva
+
+def buscar_itens_por_termo(termo, limit=50, offset=0):
+    """
+    Busca itens de compra que contenham o termo na descrição.
+    
+    Args:
+        termo (str): Termo a ser buscado na descrição dos itens
+        limit (int): Número máximo de resultados
+        offset (int): Posição inicial para paginação
+        
+    Returns:
+        list: Lista de resultados formatados com dados do item e da compra
+    """
+    try:
+        # Utiliza o método do modelo ItemCompra para buscar 
+        resultados = ItemCompra.buscar_por_termo(termo, limit, offset)
+        
+        # Formata os resultados para retorno
+        itens_formatados = []
+        for resultado in resultados:
+            itens_formatados.append({
+                'id': resultado['id'],
+                'descricao': resultado['descricao'],
+                'preco_unitario': resultado['preco_unitario'],
+                'data_compra': resultado['data_compra'],
+                'estabelecimento': resultado['estabelecimento'],
+                'unidade': resultado['unidade'],
+                'quantidade': resultado['quantidade'],
+                'compra_id': resultado['compra_id']
+            })
+        
+        return {
+            'success': True,
+            'total': len(itens_formatados),
+            'itens': itens_formatados
+        }
+    except Exception as e:
+        logger.error(f"Erro ao buscar itens por termo '{termo}': {str(e)}")
+        return {
+            'success': False,
+            'error': f"Erro ao buscar itens: {str(e)}",
+            'itens': []
+        }
+
+def buscar_compras_recentes(limit=10):
+    """
+    Retorna as compras mais recentes.
+    
+    Args:
+        limit (int): Número máximo de compras recentes
+        
+    Returns:
+        dict: Dicionário com status e lista das compras mais recentes
+    """
+    try:
+        # Delegar para o modelo Compra
+        compras = Compra.buscar_compras_recentes(limit)
+        
+        resultado = []
+        for compra in compras:
+            resultado.append({
+                'id': compra.id,
+                'data': compra.data.strftime('%d/%m/%Y'),
+                'estabelecimento': compra.estabelecimento,
+                'total': float(compra.total)
+            })
+        
+        return {
+            'success': True,
+            'total': len(resultado),
+            'compras': resultado
+        }
+    except Exception as e:
+        logger.error(f"Erro ao buscar compras recentes: {str(e)}")
+        return {
+            'success': False,
+            'error': f"Erro ao buscar compras recentes: {str(e)}",
+            'compras': []
+        }
+
+def obter_detalhes_compra(compra_id):
+    """
+    Obtém os detalhes completos de uma compra, incluindo todos seus itens.
+    
+    Args:
+        compra_id (int): ID da compra a ser consultada
+        
+    Returns:
+        dict: Detalhes da compra e seus itens
+    """
+    try:
+        # Busca a compra
+        compra = Compra.buscar_por_id(compra_id)
+        if not compra:
+            return {
+                'success': False,
+                'error': f"Compra com ID {compra_id} não encontrada"
+            }
+            
+        # Busca os itens da compra
+        itens = ItemCompra.buscar_por_compra_id(compra_id)
+        
+        # Formata os dados para retorno
+        itens_formatados = []
+        for item in itens:
+            itens_formatados.append({
+                'id': item.id,
+                'descricao': item.descricao,
+                'quantidade': float(item.quantidade),
+                'unidade': item.unidade,
+                'preco_unitario': float(item.preco_unitario),
+                'preco_total': float(item.preco_total)
+            })
+            
+        return {
+            'success': True,
+            'compra': {
+                'id': compra.id,
+                'data': compra.data.strftime('%d/%m/%Y'),
+                'estabelecimento': compra.estabelecimento,
+                'cnpj': compra.cnpj,
+                'total': float(compra.total),
+                'itens': itens_formatados
+            }
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter detalhes da compra {compra_id}: {str(e)}")
+        return {
+            'success': False,
+            'error': f"Erro ao obter detalhes da compra: {str(e)}"
+        }

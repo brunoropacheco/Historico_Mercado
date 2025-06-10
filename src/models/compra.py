@@ -1,7 +1,7 @@
 from sqlalchemy import (
-    Column, Integer, String, Date, Numeric, Text, create_engine
+    Column, Integer, String, Date, Numeric, Text, create_engine, func, desc, between
 )
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 import datetime
 import os
 
@@ -38,7 +38,48 @@ class Compra(Base):
             total=dados['total'],
         )
         return compra.salvar()
-
+    
+    @classmethod
+    def buscar_por_estabelecimento(cls, estabelecimento, limit=50, offset=0):
+        """Busca compras por nome do estabelecimento"""
+        session = SessionLocal()
+        try:
+            termo_busca = f"%{estabelecimento}%"
+            query = session.query(cls)\
+                .filter(cls.estabelecimento.like(termo_busca))\
+                .order_by(cls.data.desc())\
+                .limit(limit).offset(offset)
+            return query.all()
+        finally:
+            session.close()
+    
+    @classmethod
+    def buscar_por_periodo(cls, data_inicio, data_fim, limit=50, offset=0):
+        """Busca compras realizadas dentro de um período específico"""
+        session = SessionLocal()
+        try:
+            query = session.query(cls)\
+                .filter(cls.data.between(data_inicio, data_fim))\
+                .order_by(cls.data.desc())\
+                .limit(limit).offset(offset)
+            return query.all()
+        finally:
+            session.close()
+    
+    @classmethod
+    def obter_itens(cls, compra_id):
+        """Obtém todos os itens associados a uma compra específica"""
+        from src.models.item_compra import ItemCompra  # Importação local para evitar circular import
+        
+        session = SessionLocal()
+        try:
+            query = session.query(ItemCompra)\
+                .filter(ItemCompra.compra_id == compra_id)\
+                .order_by(ItemCompra.id)
+            return query.all()
+        finally:
+            session.close()
+    
     @classmethod
     def buscar_por_id(cls, compra_id):
         """
@@ -53,6 +94,15 @@ class Compra(Base):
         session = SessionLocal()
         try:
             return session.query(cls).filter(cls.id == compra_id).first()
+        finally:
+            session.close()
+    
+    @classmethod
+    def buscar_compras_recentes(cls, limit=10):
+        """Retorna as compras mais recentes."""
+        session = SessionLocal()
+        try:
+            return session.query(cls).order_by(cls.data.desc()).limit(limit).all()
         finally:
             session.close()
 

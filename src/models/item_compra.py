@@ -91,6 +91,23 @@ class ItemCompra(Base):
         finally:
             session.close()
 
+    @classmethod
+    def buscar_por_compra_id(cls, compra_id):
+        """
+        Busca todos os itens associados a uma compra específica.
+        
+        Args:
+            compra_id (int): ID da compra
+            
+        Returns:
+            list: Lista de objetos ItemCompra
+        """
+        session = SessionLocal()
+        try:
+            return session.query(cls).filter(cls.compra_id == compra_id).all()
+        finally:
+            session.close()
+
 # Caminho absoluto para o banco de dados
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'data', 'database', 'db.sqlite3')}"

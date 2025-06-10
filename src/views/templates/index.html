@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de Compras - Busca{% endblock %}
+
+{% block content %}
+    <section class="search-section">
+        <h2>Buscar Produtos</h2>
+        <form action="{{ url_for('buscar') }}" method="GET" class="search-form">
+            <input type="text" name="termo" placeholder="Digite o nome do produto..." required>
+            <button type="submit">Buscar</button>
+        </form>
+    </section>
+    
+    <section class="recent-purchases">
+        <h2>Compras Recentes</h2>
+        {% if compras_recentes %}
+            <ul class="purchases-list">
+                {% for compra in compras_recentes %}
+                    <li>
+                        <a href="{{ url_for('detalhes_compra', compra_id=compra.id) }}">
+                            {{ compra.data }} - {{ compra.estabelecimento }} - R$ {{ "%.2f"|format(compra.total) }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Nenhuma compra registrada recentemente.</p>
+        {% endif %}
+    </section>
+{% endblock %}

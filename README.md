@@ -5,61 +5,40 @@ Este projeto automatiza o processo de extração e análise de dados de notas fi
 ## Visão Geral
 
 O sistema é composto por dois principais módulos:
-- **Batch Diário:** Responsável por monitorar uma pasta no Google Drive, detectar novas imagens de notas fiscais, processar as imagens com OCR, extrair chave do qr code do cupom, consultar sefaz e atualizar o banco de dados.
+- **Batch Diário:** Responsável por monitorar uma pasta no Google Drive, detectar novas imagens de notas fiscais, processar as imagens, extrair chave do QR code do cupom, consultar SEFAZ e atualizar o banco de dados.
 - **Web App:** Permite ao usuário consultar o histórico de preços de produtos a partir dos dados extraídos.
 
 ## Status do Projeto (Versão 0.1.0 - Em Desenvolvimento)
 
-Atualmente, o projeto encontra-se em fase inicial de desenvolvimento. As seguintes funcionalidades foram implementadas:
+Atualmente, o projeto encontra-se em fase de desenvolvimento com as seguintes funcionalidades implementadas:
 
-*   **Monitoramento de Pasta no Google Drive:** O script `scripts/process_daily.py` consegue monitorar uma pasta especificada no Google Drive em busca de novas imagens.
-*   **Download de Imagens:** Novas imagens detectadas são baixadas para a pasta local `data/images`.
-*   **Extração de Chave de Acesso via QR Code:** O sistema identifica e extrai a chave de acesso NFC-e a partir do QR code presente nas imagens de notas fiscais.
-*   **Consulta Automatizada à SEFAZ:** Utilizando a chave obtida, o sistema consulta o portal da Secretaria da Fazenda para extrair dados detalhados do cupom fiscal.
-*   **Persistência de Dados:** Os dados extraídos das notas fiscais (estabelecimento, valor total, itens) são salvos em um banco de dados SQLite local para consultas posteriores.
-*   **Exibição de Dados Extraídos:** Os dados estruturados da nota fiscal e informações básicas da imagem são exibidos no console.
+*   **Monitoramento de Pasta no Google Drive:** O script `scripts/process_daily.py` monitora pastas especificadas no Google Drive em busca de novas imagens.
+*   **Download e Processamento de Imagens:** Novas imagens são baixadas, processadas e depois excluídas do servidor local.
+*   **Extração de Chave de Acesso via QR Code:** O sistema identifica e extrai a chave de acesso NFC-e a partir do QR code presente nas imagens.
+*   **Consulta Automatizada à SEFAZ:** Utilizando a chave obtida, o sistema consulta o portal da Secretaria da Fazenda para extrair dados do cupom fiscal.
+*   **Persistência de Dados:** Os dados extraídos são salvos em um banco de dados SQLite para consultas posteriores.
+*   **Interface Web Básica:** Uma interface web implementada com Flask permite a consulta de produtos e visualização de compras.
 
-**Funcionalidades Ainda Não Implementadas / Em Desenvolvimento:**
+**Funcionalidades Ainda Pendentes:**
 
 *   Refinamento do parser para extração de dados mais complexos (descrições padronizadas, categorização de produtos).
-*   Ajustar o tipo da variavel quantidade para poder ser decimal no caso de produtos por quilo
+*   Ajuste do tipo da variável quantidade para suportar decimal no caso de produtos por quilo.
 *   Otimização do acesso à SEFAZ para lidar com restrições de acesso.
-*   Desenvolvimento do Web App para consulta dos dados.
-*   Automação completa do processo batch (agendamento, tratamento de erros robusto).
-*   Melhoramento da imagem para ter mais chances de obter o qr code
+*   Melhoramento do processamento de imagem para aumentar a taxa de sucesso na leitura do QR code.
+*   Implantação em ambiente produtivo.
 
-O objetivo é evoluir para um sistema completamente automatizado e com uma interface web funcional.
+## Casos de Uso
 
-## Casos de Uso (Planejados)
-
-- **UC01:** Adicionar nova imagem na pasta (Administrador)
-- **UC02:** Monitorar diariamente a pasta (Script de Monitoramento)
-- **UC03:** Processar novas imagens detectadas (Script de Monitoramento)
-- **UC04:** Atualizar banco de dados com dados das imagens (Script de Monitoramento)
-- **UC05:** Consultar histórico de preços (Administrador)
-
-## Fluxo Batch Diário (Implementação Parcial)
-
-1.  Detectar novas imagens no Google Drive (Implementado).
-2.  Se existirem novas imagens:
-    *   Baixar a imagem (Implementado).
-    *   Extrair chave de acesso via QR code (Implementado).
-    *   Consultar site da SEFAZ usando a chave extraída (Implementado).
-    *   Fazer parse dos dados retornados (Implementado parcialmente).
-    *   Salvar dados estruturados no banco SQLite (Implementado parcialmente).
-3.  Se não existirem novas imagens:
-    *   Aguardar próximo ciclo e voltar a detectar novas imagens (Lógica básica implementada).
-
-## Fluxo Web App (Não Implementado)
-
-1.  Usuário acessa o site.
-2.  Insere termo de pesquisa.
-3.  Consulta o banco de dados.
-4.  Exibe o histórico de preços.
+- **UC01:** Adicionar nova imagem na pasta (Implementado)
+- **UC02:** Monitorar diariamente a pasta (Implementado)
+- **UC03:** Processar novas imagens detectadas (Implementado)
+- **UC04:** Atualizar banco de dados com dados das imagens (Implementado)
+- **UC05:** Consultar histórico de preços (Implementado)
+- **UC06:** Visualizar detalhes de uma compra específica (Implementado)
 
 ## Fluxo de Processamento
 
-O sistema agora funciona com o seguinte fluxo:
+O sistema funciona com o seguinte fluxo:
 
 1. Busca imagens na pasta do Google Drive definida pela variável de ambiente `GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID`
 2. Processa cada imagem:
@@ -71,7 +50,7 @@ O sistema agora funciona com o seguinte fluxo:
 
 ### Tolerância a Falhas
 
-O sistema foi melhorado para lidar com erros sem interromper o processamento:
+O sistema foi implementado para lidar com erros sem interromper o processamento:
 - Se não conseguir ler o QR code de uma imagem, passa para a próxima
 - Qualquer erro durante o processamento é registrado no log e o sistema continua
 - As imagens com erro também são movidas para a pasta de tratados
@@ -85,44 +64,29 @@ Para melhor eficiência do sistema:
 - Evite reflexos, sombras ou obstruções no QR code
 - Mantenha a câmera estável ao fotografar
 
-## Configuração das Pastas
+## Tecnologias Utilizadas
 
-Configure as seguintes variáveis de ambiente adicionais:
-
-```sh
-# Pasta onde serão colocadas as novas notas fiscais
-export GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID='id-da-pasta-de-novas-notas'
-
-# Pasta para onde as notas serão movidas após processamento
-export GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID='id-da-pasta-de-notas-tratadas'
-```
+- **Python** (OpenCV, pyzbar, Flask)
+- **SQLite** (banco de dados local)
+- **Google Drive API** (monitoramento de imagens)
+- **HTML/CSS** (interface web)
+- **PlantUML** (documentação dos fluxos)
 
 ## Diagramas
 
 Os diagramas de casos de uso e fluxograma do sistema estão disponíveis na pasta `docs/`:
 - `docs/casos_de_uso.plantuml`
 - `docs/fluxograma.plantuml`
-- `docs/diagrama_mvc.plantuml` (Representa a arquitetura planejada para o Web App)
+- `docs/diagrama_mvc.plantuml` (Representa a arquitetura do Web App)
 
 Para visualizar os diagramas, utilize a extensão PlantUML no VS Code ou gere as imagens via terminal:
 
 ```sh
 sudo apt-get install plantuml graphviz
 plantuml docs/casos_de_uso.plantuml
-plantuml docs/fluxograma.plplantuml
+plantuml docs/fluxograma.plantuml
 plantuml docs/diagrama_mvc.plantuml
 ```
-
-## Tecnologias Utilizadas (e Planejadas)
-
-- **Python** (pytesseract para OCR, Flask/Django para Web App - planejado)
-- **SQLite** (banco de dados local para armazenamento e testes)
-- **PlantUML** (documentação dos fluxos)
-- **Google Drive API** (monitoramento de imagens)
-- **Tesseract OCR** (motor de reconhecimento óptico de caracteres)
-- **Banco de Dados** (SQLite, PostgreSQL, ou outro - a definir)
-- **Regex/BeautifulSoup** (parser de HTML para extração de dados)
-- *Flask/Django* (Web App - planejado)
 
 ## Como Contribuir
 
@@ -132,9 +96,28 @@ plantuml docs/diagrama_mvc.plantuml
 
 ## Configuração do Ambiente
 
+### Dependências do Sistema (Linux)
+
+Antes de instalar as dependências Python, instale as bibliotecas do sistema necessárias:
+
+```sh
+sudo apt-get update
+sudo apt-get install libgl1 libzbar0
+```
+
+Essas bibliotecas são necessárias para o funcionamento do OpenCV (`cv2`) e do `pyzbar`.
+
+### Inicialização do Banco de Dados
+
+Antes de executar o sistema pela primeira vez, crie o banco de dados SQLite:
+
+```sh
+python scripts/init_db.py
+```
+
 ### Configuração do Google Drive API
 
-Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive, é necessário configurar o acesso à API do Google. Siga os passos abaixo:
+Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive:
 
 1.  **Criar projeto no Google Cloud Platform**
     1.  Acesse o [Console do Google Cloud](https://console.cloud.google.com/)
@@ -150,7 +133,7 @@ Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive
     1.  No menu lateral, vá para "APIs e Serviços" > "Credenciais"
     2.  Clique em "Criar credenciais" > "Conta de serviço"
     3.  Preencha o nome, ID e descrição da conta de serviço
-    4.  Conceda o papel/role "Leitor do Drive" (Drive File Reader)
+    4.  Conceda o papel/role "Editor do Drive" (Drive File Editor) - necessário para mover arquivos
     5.  Conclua a criação da conta de serviço
     6.  Anote o email da conta de serviço (formato: `nome-servico@projeto-id.iam.gserviceaccount.com`)
 
@@ -162,54 +145,75 @@ Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive
     5.  O arquivo de credenciais será baixado automaticamente para seu computador
     6.  **IMPORTANTE**: Mantenha este arquivo seguro e nunca o adicione ao controle de versão
 
-5.  **Compartilhar pasta do Google Drive com a conta de serviço**
+5.  **Compartilhar pastas do Google Drive com a conta de serviço**
     1.  Acesse seu [Google Drive](https://drive.google.com/)
-    2.  Crie uma pasta para armazenar as imagens das notas fiscais
-    3.  Clique com o botão direito na pasta > "Compartilhar"
-    4.  No campo de email, insira o email da conta de serviço
-    5.  Defina a permissão como "Leitor"
-    6.  Desmarque a opção de notificação e clique em "Compartilhar"
-    7.  Obtenha o ID da pasta da URL (formato: `https://drive.google.com/drive/folders/SEU_FOLDER_ID_AQUI`)
+    2.  Crie duas pastas: uma para novas notas e outra para notas tratadas
+    3.  Compartilhe ambas as pastas com o email da conta de serviço com permissão "Editor"
+    4.  Obtenha os IDs das pastas a partir das URLs
 
-6.  **Configurar variáveis de ambiente para o Google Drive**
-    Para proteger suas credenciais, use variáveis de ambiente em vez de incluir diretamente no código:
-
-    1.  Converta o conteúdo do arquivo JSON das credenciais para uma string única (removendo quebras de linha).
-    2.  Configure as seguintes variáveis de ambiente:
+6.  **Configurar variáveis de ambiente**
+    Configure as seguintes variáveis:
 
     **Linux/macOS:**
     ```bash
     export GOOGLE_DRIVE_CREDENTIALS='{"type":"service_account","project_id":"seu-projeto",...}'
-    export GOOGLE_DRIVE_FOLDER_ID='seu-folder-id'
+    export GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID='id-da-pasta-de-novas-notas'
+    export GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID='id-da-pasta-de-notas-tratadas'
     ```
 
     **Windows:**
     ```cmd
     set GOOGLE_DRIVE_CREDENTIALS={"type":"service_account","project_id":"seu-projeto",...}
-    set GOOGLE_DRIVE_FOLDER_ID=seu-folder-id
+    set GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID=id-da-pasta-de-novas-notas
+    set GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID=id-da-pasta-de-notas-tratadas
     ```
 
-    Para desenvolvimento, crie um arquivo `.env` na raiz do projeto com estas variáveis (não esqueça de adicionar `.env` ao `.gitignore`).
+    Para desenvolvimento, crie um arquivo `.env` na raiz do projeto com estas variáveis.
 
-## Dependências do Sistema (Linux)
+## Interface Gráfica Web
 
-Antes de instalar as dependências Python, instale as bibliotecas do sistema necessárias:
+Uma interface web foi implementada para facilitar a consulta aos dados das notas fiscais:
 
-```sh
-sudo apt-get update
-sudo apt-get install libgl1 libzbar0
+* **Página inicial com busca**: Interface para pesquisar produtos pelo nome/descrição
+* **Listagem de resultados**: Exibição dos produtos encontrados com detalhes como preço e estabelecimento
+* **Visualização de compra**: Página detalhada de uma compra específica com todos os itens
+
+### Estrutura de Arquivos
+
+```
+src/
+├── views/
+│   ├── templates/           # Arquivos HTML
+│   │   ├── base.html        # Template base com estrutura comum
+│   │   ├── index.html       # Página inicial com busca
+│   │   ├── resultados.html  # Listagem de resultados da busca
+│   │   └── detalhes_compra.html  # Visualização detalhada de uma compra
+│   └── static/              # Arquivos estáticos
+│       └── css/
+│           └── style.css    # Estilos da aplicação
+app.py                      # Aplicação Flask com rotas definidas
 ```
 
-Essas bibliotecas são necessárias para o funcionamento do OpenCV (`cv2`) e do `pyzbar`.
+### Execução da Aplicação Web
 
-> **Nota:** O `pytesseract` não é mais necessário para este projeto.
-
-## Inicialização do Banco de Dados
-
-Antes de executar o sistema pela primeira vez, é necessário criar o banco de dados SQLite. Para isso, execute o script de inicialização:
+Para executar a aplicação web localmente:
 
 ```sh
-python scripts/init_db.py
+python app.py
 ```
 
-Esse comando irá criar o arquivo do banco de dados com as tabelas necessárias para o funcionamento do projeto.
+A aplicação estará disponível em http://localhost:5000
+
+## Próximos Passos
+
+Os próximos passos no desenvolvimento do projeto incluem:
+
+1. Implementar análise de dados e histórico de preços em gráficos
+2. Melhorar o sistema de categorização de produtos
+3. Adicionar funcionalidade de exportação de dados
+4. Implantar em ambiente produtivo:
+   - Configurar servidor web (Nginx/Apache)
+   - Utilizar servidor WSGI (Gunicorn/uWSGI)
+   - Implementar monitoramento e logging
+   - Configurar ambiente seguro para variáveis
+   - Automatizar backups do banco de dados

@@ -7,8 +7,8 @@ from google.oauth2 import service_account
 import io
 import logging
 import json
-from pegar_chave import extrair_chave
-from pegar_dados_cupom import extrair_dados_cupom
+import pegar_chave
+import pegar_dados_cupom
 
 
 # Setup logging
@@ -38,7 +38,7 @@ def authenticate_google_drive():
         credentials_info = json.loads(credentials_json)
         
         # Define required scopes
-        SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+        SCOPES = ['https://www.googleapis.com/auth/drive']
         
         # Create credentials from the parsed JSON
         credentials = service_account.Credentials.from_service_account_info(
@@ -70,8 +70,9 @@ def get_last_check_time():
     
     # Converter para UTC (para a API do Google)
     seven_days_ago_utc = seven_days_ago_brasilia.astimezone(datetime.timezone.utc)
+    print(seven_days_ago_utc.isoformat(timespec='miliseconds'))  # Formato ISO com Z para UTC
     
-    return seven_days_ago_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
+    return seven_days_ago_utc.isoformat()+ 'Z'  # Formato ISO com Z para UTC
 
 def update_last_check_time():
     """Update the timestamp of the last folder check"""
@@ -156,6 +157,23 @@ def check_for_new_images_metadata(drive_service, folder_id, last_check_time):
         logger.error(f"Error checking for new images metadata: {str(e)}")
         return [] # Return an empty list in case of error
 
+def move_file_to_folder(drive_service, file_id, target_folder_id):
+    """Move a file to another folder in Google Drive."""
+    try:
+        # Retrieve the existing parents to remove
+        file = drive_service.files().get(fileId=file_id, fields='parents').execute()
+        previous_parents = ",".join(file.get('parents', []))
+        # Move the file to the new folder
+        drive_service.files().update(
+            fileId=file_id,
+            addParents=target_folder_id,
+            removeParents=previous_parents,
+            fields='id, parents'
+        ).execute()
+        logger.info(f"Arquivo {file_id} movido para a pasta {target_folder_id}")
+    except Exception as e:
+        logger.error(f"Erro ao mover arquivo {file_id} para a pasta {target_folder_id}: {str(e)}")
+
 def main():
     """Main function to run the daily monitoring process"""
     logger.info("Starting daily monitoring process")
@@ -165,11 +183,12 @@ def main():
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
     from src.controllers.process_controller import salvar_dados_nota
-  
-    # Ensure environment variables are set
-    folder_id = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
-    if not folder_id:
-        logger.error("GOOGLE_DRIVE_FOLDER_ID environment variable not set")
+
+    # Novas variáveis de ambiente para as pastas
+    folder_novasnotas_id = os.environ.get('GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID')
+    folder_notastratadas_id = os.environ.get('GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID')
+    if not folder_novasnotas_id or not folder_notastratadas_id:
+        logger.error("Variáveis de ambiente GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID ou GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID não definidas")
         return
 
     drive_service = authenticate_google_drive()
@@ -177,40 +196,59 @@ def main():
         logger.error("Failed to authenticate with Google Drive. Exiting.")
         return
 
-    last_check_time = get_last_check_time()
-    
-    new_images_metadata = check_for_new_images_metadata(drive_service, folder_id, last_check_time)
-    
+    # Busca todas as imagens na pasta de novas notas (sem filtro de data)
+    try:
+        query = f"'{folder_novasnotas_id}' in parents and mimeType contains 'image/'"
+        results = drive_service.files().list(
+            q=query,
+            spaces='drive',
+            fields="files(id, name, mimeType, createdTime, modifiedTime, size)"
+        ).execute()
+        new_images_metadata = results.get('files', [])
+    except Exception as e:
+        logger.error(f"Erro ao buscar imagens na pasta de novas notas: {str(e)}")
+        return
+
     if not new_images_metadata:
         logger.info("No new images found.")
     else:
         logger.info(f"Found {len(new_images_metadata)} new image(s).")
         for file_meta in new_images_metadata:
-            file_id = file_meta.get('id')
-            file_name = file_meta.get('name')
-            
-            if file_id and file_name:
-                logger.info(f"Processing image: {file_name} (ID: {file_id})")
-                file_path = download_and_process_image(drive_service, file_id, file_name)
-                chave = extrair_chave(file_path)
-                if chave:
-                    logger.info(f"Chave de acesso extraída: {chave}")
-                    logger.info(f"Extraindo dados do cupom via site SEFAZ")
-                    # Aqui você poderia adicionar lógica para salvar a chave ou processar mais
-                    dados_cupom = extrair_dados_cupom(chave)
-                    if dados_cupom:
-                        logger.info(f"Dados do cupom extraídos: {dados_cupom}")
-                        salvar_dados_nota(dados_cupom)
-                        logger.info(f"Dados do cupom salvos com sucesso para a chave: {chave}")
-                        
+            try:
+                file_id = file_meta.get('id')
+                file_name = file_meta.get('name')
+
+                if file_id and file_name:
+                    logger.info(f"Processing image: {file_name} (ID: {file_id})")
+                    file_path = download_and_process_image(drive_service, file_id, file_name)
+                    chave = pegar_chave.extrair_chave(file_path)
+                    if chave:
+                        logger.info(f"Chave de acesso extraída: {chave}")
+                        logger.info(f"Extraindo dados do cupom via site SEFAZ")
+                        dados_cupom = pegar_dados_cupom.extrair_dados_cupom(chave)
+                        if dados_cupom:
+                            logger.info(f"Dados do cupom extraídos: {dados_cupom}")
+                            salvar_dados_nota(dados_cupom)
+                            logger.info(f"Dados do cupom salvos com sucesso para a chave: {chave}")
+                        else:
+                            logger.warning(f"Não foi possível extrair dados do cupom para a chave: {chave}")
                     else:
-                        logger.warning(f"Não foi possível extrair dados do cupom para a chave: {chave}")
+                        logger.warning(f"Chave de acesso não encontrada na imagem: {file_name}")
+
+                    # Move o arquivo para a pasta de notas tratadas
+                    move_file_to_folder(drive_service, file_id, folder_notastratadas_id)
+                    
+                    # Apagar a imagem local após o processamento
+                    if os.path.exists(file_path):
+                        try:
+                            os.remove(file_path)
+                            logger.info(f"Imagem local removida: {file_path}")
+                        except Exception as e:
+                            logger.warning(f"Não foi possível remover a imagem local {file_path}: {str(e)}")
                 else:
-                    logger.warning(f"Chave de acesso não encontrada na imagem: {file_name}")                                
-            else:
-                logger.warning(f"Skipping file with missing ID or name: {file_meta}")
-                
-    update_last_check_time()
+                    logger.warning(f"Skipping file with missing ID or name: {file_meta}")
+            except Exception as e:
+                logger.error(f"Erro de processamento do arquivo {file_meta.get('name', 'unknown')}: {str(e)}")
     logger.info("Daily monitoring process completed")
 
 if __name__ == "__main__":

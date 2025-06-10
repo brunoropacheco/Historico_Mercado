@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes da Compra{% endblock %}
+
+{% block content %}
+    <section class="purchase-details">
+        <div class="purchase-header">
+            <h2>Compra - {{ compra.data }}</h2>
+            <a href="{{ url_for('index') }}" class="btn-back">&larr; Voltar</a>
+        </div>
+        
+        <div class="purchase-info">
+            <div class="info-item">
+                <strong>Data:</strong> {{ compra.data }}
+            </div>
+            <div class="info-item">
+                <strong>Estabelecimento:</strong> {{ compra.estabelecimento }}
+            </div>
+            <div class="info-item">
+                <strong>CNPJ:</strong> {{ compra.cnpj }}
+            </div>
+            <div class="info-item">
+                <strong>Total:</strong> R$ {{ "%.2f"|format(compra.total) }}
+            </div>
+        </div>
+        
+        <h3>Itens da Compra</h3>
+        {% if compra.itens %}
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Unidade</th>
+                        <th>Preço Unit.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in compra.itens %}
+                        <tr>
+                            <td>{{ item.descricao }}</td>
+                            <td>{{ "%.3f"|format(item.quantidade) }}</td>
+                            <td>{{ item.unidade }}</td>
+                            <td class="price">R$ {{ "%.2f"|format(item.preco_unitario) }}</td>
+                            <td class="price">R$ {{ "%.2f"|format(item.preco_total) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="total-label">Total</td>
+                        <td class="price total-value">R$ {{ "%.2f"|format(compra.total) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        {% else %}
+            <p class="no-items">Esta compra não possui itens registrados.</p>
+        {% endif %}
+    </section>
+{% endblock %}

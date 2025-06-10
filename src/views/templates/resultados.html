@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados da Busca{% endblock %}
+
+{% block content %}
+    <section class="search-results">
+        <h2>Resultados para "{{ termo }}"</h2>
+        
+        <div class="search-form-container">
+            <form action="{{ url_for('buscar') }}" method="GET" class="search-form">
+                <input type="text" name="termo" value="{{ termo }}" required>
+                <button type="submit">Buscar Novamente</button>
+            </form>
+        </div>
+        
+        {% if itens %}
+            <p>{{ itens|length }} resultado(s) encontrado(s)</p>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Preço Unit.</th>
+                        <th>Unidade</th>
+                        <th>Data</th>
+                        <th>Estabelecimento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens %}
+                        <tr>
+                            <td>{{ item.descricao }}</td>
+                            <td class="price">R$ {{ "%.2f"|format(item.preco_unitario) }}</td>
+                            <td>{{ item.unidade }}</td>
+                            <td>{{ item.data_compra }}</td>
+                            <td>{{ item.estabelecimento }}</td>
+                            <td>
+                                <a href="{{ url_for('detalhes_compra', compra_id=item.compra_id) }}" class="btn btn-details">
+                                    Ver Compra
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-results">Nenhum resultado encontrado para "{{ termo }}".</p>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -198,12 +198,12 @@ def extrair_dados_html(path_html):
                 valor = tds[1].find('span', class_='valor')
                 valor = valor.get_text(strip=True) if valor else ''
                 itens.append({
-                    'texto': texto,
+                    'descricao': texto,
                     'codigo': codigo,
                     'quantidade': quantidade,
                     'unidade': unidade,
                     'valor_unitario': valor_unitario,
-                    'valor': valor
+                    'valor_total': valor
                 })
 
     print('Empresa:', nome_empresa)
@@ -211,7 +211,7 @@ def extrair_dados_html(path_html):
     print('Endereço:', endereco)
     print('Itens da compra:')
     for item in itens:
-        print(f"  - Produto: {item['texto']}, Código: {item['codigo']}, Qtde: {item['quantidade']}, UN: {item['unidade']}, Vl. Unit.: {item['valor_unitario']}, Valor: {item['valor']}")
+        print(f"  - Produto: {item['descricao']}, Código: {item['codigo']}, Qtde: {item['quantidade']}, UN: {item['unidade']}, Vl. Unit.: {item['valor_unitario']}, Valor: {item['valor_total']}")
     # Data da compra
     data_compra = ''
     data_div = soup.find('span', class_='txtTopo', string=re.compile(r'\d{2}/\d{2}/\d{4}'))

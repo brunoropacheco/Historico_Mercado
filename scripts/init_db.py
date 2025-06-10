@@ -31,6 +31,7 @@ def init_db():
     
     # Importa os models após definir o sys.path
     from src.models.compra import Base as CompraBase, engine as compra_engine
+    from src.models.item_compra import Base as ItemCompraBase, engine as item_compra_engine
     
     # Cria as tabelas de cada model
     print("Criando tabela 'compras'...")
@@ -38,8 +39,7 @@ def init_db():
     
     print("Criando tabela 'itens_compra'...")
     # Descomente e ajuste quando tiver o model de itens_compra
-    # from src.models.itens_compra import Base as ItensCompraBase, engine as itens_compra_engine
-    # ItensCompraBase.metadata.create_all(bind=itens_compra_engine)
+    ItemCompraBase.metadata.create_all(bind=item_compra_engine)
     
     # Verificar se o arquivo foi criado com sucesso
     if os.path.exists(db_path):

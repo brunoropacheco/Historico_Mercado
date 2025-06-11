@@ -50,49 +50,6 @@ def authenticate_google_drive():
         logger.error(f"Authentication error: {str(e)}")
         return None
 
-def get_last_check_time():
-    """Get the timestamp of the last folder check"""
-    if os.path.exists(LAST_CHECK_FILE):
-        with open(LAST_CHECK_FILE, 'r') as f:
-            timestamp = f.read().strip()
-            if timestamp:
-                return timestamp
-    
-    # Criar timezone de Brasília (UTC-3)
-    brasilia_tz = datetime.timezone(datetime.timedelta(hours=-3))
-    
-    # Obter data atual em Brasília
-    now_brasilia = datetime.datetime.now(brasilia_tz)
-    
-    # Se não houver último check, retornar 7 dias atrás no horário de Brasília
-    # mas convertido para UTC para compatibilidade com a API Google Drive
-    seven_days_ago_brasilia = now_brasilia - datetime.timedelta(days=7)
-    
-    # Converter para UTC (para a API do Google)
-    seven_days_ago_utc = seven_days_ago_brasilia.astimezone(datetime.timezone.utc)
-    print(seven_days_ago_utc.isoformat(timespec='miliseconds'))  # Formato ISO com Z para UTC
-    
-    return seven_days_ago_utc.isoformat()+ 'Z'  # Formato ISO com Z para UTC
-
-def update_last_check_time():
-    """Update the timestamp of the last folder check"""
-    # Criar timezone de Brasília (UTC-3)
-    brasilia_tz = datetime.timezone(datetime.timedelta(hours=-3))
-    
-    # Obter data atual em Brasília
-    now_brasilia = datetime.datetime.now(brasilia_tz)
-    
-    # Converter para UTC para compatibilidade com a API
-    now_utc = now_brasilia.astimezone(datetime.timezone.utc)
-    
-    # Salvar no formato ISO com Z
-    timestamp = now_utc.isoformat('T') + 'Z'
-    
-    with open(LAST_CHECK_FILE, 'w') as f:
-        f.write(timestamp)
-    
-    return timestamp
-
 def is_receipt_image(file):
     """Check if the file is likely a receipt image based on mime type"""
     mime_type = file.get('mimeType', '')
@@ -122,6 +79,7 @@ def download_and_process_image(drive_service, file_id, file_name):
         with open(file_path, 'wb') as f:
             f.write(file_io.getvalue())
         
+        '''
         # Print file information
         created_time = file_metadata.get('createdTime', 'N/A')
         modified_time = file_metadata.get('modifiedTime', 'N/A')
@@ -132,7 +90,7 @@ def download_and_process_image(drive_service, file_id, file_name):
         print(f"Size: {size_kb:.2f} KB")
         print(f"Created: {created_time}")
         print(f"Last modified: {modified_time}")
-        
+        '''
         return file_path
     
     except Exception as e:
@@ -173,6 +131,16 @@ def move_file_to_folder(drive_service, file_id, target_folder_id):
         logger.info(f"Arquivo {file_id} movido para a pasta {target_folder_id}")
     except Exception as e:
         logger.error(f"Erro ao mover arquivo {file_id} para a pasta {target_folder_id}: {str(e)}")
+
+# Ao processar os itens:
+def process_item(item_data):
+    # Garantir que quantidades estão em formato correto
+    if 'quantidade' in item_data:
+        quantidade = item_data['quantidade']
+        # Converter de string para float se necessário
+        if isinstance(quantidade, str):
+            quantidade = quantidade.replace(',', '.')
+            item_data['quantidade'] = float(quantidade)
 
 def main():
     """Main function to run the daily monitoring process"""

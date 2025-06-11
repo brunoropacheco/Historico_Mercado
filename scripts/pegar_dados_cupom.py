@@ -175,7 +175,7 @@ def extrair_dados_html(path_html):
                 quantidade = ''
                 if qtd_span:
                     qtd_text = qtd_span.get_text()
-                    match = re.search(r'Qtde\.:\s*(\d+)', qtd_text)
+                    match = re.search(r'Qtde\.:\s*(\d+[.,]?\d*)', qtd_text)
                     if match:
                         quantidade = match.group(1)
                 # Unidade
@@ -206,12 +206,6 @@ def extrair_dados_html(path_html):
                     'valor_total': valor
                 })
 
-    print('Empresa:', nome_empresa)
-    print('CNPJ:', cnpj)
-    print('Endereço:', endereco)
-    print('Itens da compra:')
-    for item in itens:
-        print(f"  - Produto: {item['descricao']}, Código: {item['codigo']}, Qtde: {item['quantidade']}, UN: {item['unidade']}, Vl. Unit.: {item['valor_unitario']}, Valor: {item['valor_total']}")
     # Data da compra
     data_compra = ''
     data_div = soup.find('span', class_='txtTopo', string=re.compile(r'\d{2}/\d{2}/\d{4}'))
@@ -238,24 +232,37 @@ def extrair_dados_html(path_html):
     # Valor total da compra (NOVO CÓDIGO)
     total_compra = None
     
-    # Método 1: Procurar por elementos com texto específico
-    total_spans = soup.find_all(['span', 'div', 'td'], 
-                              string=re.compile(r'(valor\s+total|total\s+r\$|valor\s+a\s+pagar)', re.I))
+    # Método 0: Procurar pelo elemento específico com classe totalNumb txtMax
+    total_element = soup.find('span', class_='totalNumb txtMax')
+    if total_element:
+        valor_texto = total_element.get_text(strip=True)
+        # Remover R$ se existir e trocar vírgula por ponto
+        valor_limpo = valor_texto.replace('R$', '').replace(' ', '').replace('.', '').replace(',', '.')
+        try:
+            total_compra = valor_limpo
+            print(f"Total encontrado pelo elemento totalNumb: {total_compra}")
+        except ValueError:
+            pass
     
-    for span in total_spans:
-        # Tenta extrair valor do próprio elemento
-        valor_match = re.search(r'R?\$?\s*(\d+[,.]\d+)', span.get_text())
-        if valor_match:
-            total_compra = valor_match.group(1).replace('.', '').replace(',', '.')
-            break
+    # Método 1: Procurar por elementos com texto específico
+    if not total_compra:
+        total_spans = soup.find_all(['span', 'div', 'td'], 
+                                string=re.compile(r'(valor\s+total|total\s+r\$|valor\s+a\s+pagar)', re.I))
         
-        # Se não encontrou no elemento, procura no próximo irmão ou pai
-        next_el = span.find_next(['span', 'div'])
-        if next_el:
-            valor_match = re.search(r'R?\$?\s*(\d+[,.]\d+)', next_el.get_text())
+        for span in total_spans:
+            # Tenta extrair valor do próprio elemento
+            valor_match = re.search(r'R?\$?\s*(\d+[,.]\d+)', span.get_text())
             if valor_match:
                 total_compra = valor_match.group(1).replace('.', '').replace(',', '.')
                 break
+            
+            # Se não encontrou no elemento, procura no próximo irmão ou pai
+            next_el = span.find_next(['span', 'div'])
+            if next_el:
+                valor_match = re.search(r'R?\$?\s*(\d+[,.]\d+)', next_el.get_text())
+                if valor_match:
+                    total_compra = valor_match.group(1).replace('.', '').replace(',', '.')
+                    break
     
     # Método 2: Última linha da tabela de itens (geralmente contém o total)
     if not total_compra and tabela:

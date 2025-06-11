@@ -27,23 +27,50 @@ def extrair_chave(image_path):
     if image is None:
         raise ValueError(f"Não foi possível ler a imagem: {image_path}")
     
-    # Tentar diferentes pré-processamentos se necessário
+    # Criar várias versões da imagem com diferentes pré-processamentos
     images_to_try = [
         image,  # Imagem original
         cv2.cvtColor(image, cv2.COLOR_BGR2GRAY),  # Versão em escala de cinza
+        
+        # Aplicar equalização de histograma para melhorar o contraste
+        cv2.equalizeHist(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)),
+        
+        # Aplicar threshold adaptativo
+        cv2.adaptiveThreshold(
+            cv2.cvtColor(image, cv2.COLOR_BGR2GRAY),
+            255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        ),
+        
+        # Aplicar threshold OTSU
+        cv2.threshold(
+            cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), 0, 255, 
+            cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )[1],
+        
+        # Aplicar GaussianBlur para reduzir ruído e depois threshold
+        cv2.threshold(
+            cv2.GaussianBlur(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), (5, 5), 0),
+            0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )[1],
+        
+        # Redimensionar para cima (pode ajudar em imagens pequenas)
+        cv2.resize(image, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
     ]
     
     # Tentar decodificar QR code em cada versão da imagem
     qr_data = None
-    for img in images_to_try:
-        # Decodificar todos QR codes encontrados na imagem
-        decoded_objects = decode(img)
-        
-        if decoded_objects:
-            # Usar o primeiro QR code encontrado
-            qr_data = decoded_objects[0].data.decode('utf-8')
-            print(f"QR Code detectado com conteúdo: {qr_data}")
-            break
+    for i, img in enumerate(images_to_try):
+        try:
+            # Decodificar todos QR codes encontrados na imagem
+            decoded_objects = decode(img)
+            
+            if decoded_objects:
+                # Usar o primeiro QR code encontrado
+                qr_data = decoded_objects[0].data.decode('utf-8')
+                print(f"QR Code detectado com conteúdo (método {i}): {qr_data}")
+                break
+        except Exception as e:
+            print(f"Erro ao processar imagem com método {i}: {str(e)}")
     
     if not qr_data:
         raise ValueError("Nenhum QR code encontrado na imagem.")

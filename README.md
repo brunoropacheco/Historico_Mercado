@@ -21,11 +21,7 @@ Atualmente, o projeto encontra-se em fase de desenvolvimento com as seguintes fu
 
 **Funcionalidades Ainda Pendentes:**
 
-*   Refinamento do parser para extração de dados mais complexos (descrições padronizadas, categorização de produtos).
-*   Ajuste do tipo da variável quantidade para suportar decimal no caso de produtos por quilo.
-*   Otimização do acesso à SEFAZ para lidar com restrições de acesso.
-*   Melhoramento do processamento de imagem para aumentar a taxa de sucesso na leitura do QR code.
-*   Implantação em ambiente produtivo.
+*   Implantação em ambiente produtivo fora do github codespaces
 
 ## Casos de Uso
 
@@ -42,11 +38,15 @@ O sistema funciona com o seguinte fluxo:
 
 1. Busca imagens na pasta do Google Drive definida pela variável de ambiente `GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID`
 2. Processa cada imagem:
+   - Executa melhorias na imagem
    - Extrai a chave do QR code
    - Consulta os dados da nota fiscal via SEFAZ
    - Salva os dados no banco SQLite
 3. Move a imagem processada para a pasta `GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID` 
 4. Exclui a imagem temporária do servidor local
+5. Obtem os dados do cupom via site da SEFAZ
+6. Salva os dados no bnnco de dados
+7. Cliente acessa via interface web para buscar por termo
 
 ### Tolerância a Falhas
 
@@ -71,6 +71,7 @@ Para melhor eficiência do sistema:
 - **Google Drive API** (monitoramento de imagens)
 - **HTML/CSS** (interface web)
 - **PlantUML** (documentação dos fluxos)
+- **Flask** (servidor WEB)
 
 ## Diagramas
 
@@ -78,15 +79,6 @@ Os diagramas de casos de uso e fluxograma do sistema estão disponíveis na past
 - `docs/casos_de_uso.plantuml`
 - `docs/fluxograma.plantuml`
 - `docs/diagrama_mvc.plantuml` (Representa a arquitetura do Web App)
-
-Para visualizar os diagramas, utilize a extensão PlantUML no VS Code ou gere as imagens via terminal:
-
-```sh
-sudo apt-get install plantuml graphviz
-plantuml docs/casos_de_uso.plantuml
-plantuml docs/fluxograma.plantuml
-plantuml docs/diagrama_mvc.plantuml
-```
 
 ## Como Contribuir
 
@@ -205,15 +197,3 @@ python app.py
 A aplicação estará disponível em http://localhost:5000
 
 ## Próximos Passos
-
-Os próximos passos no desenvolvimento do projeto incluem:
-
-1. Implementar análise de dados e histórico de preços em gráficos
-2. Melhorar o sistema de categorização de produtos
-3. Adicionar funcionalidade de exportação de dados
-4. Implantar em ambiente produtivo:
-   - Configurar servidor web (Nginx/Apache)
-   - Utilizar servidor WSGI (Gunicorn/uWSGI)
-   - Implementar monitoramento e logging
-   - Configurar ambiente seguro para variáveis
-   - Automatizar backups do banco de dados

@@ -3,41 +3,51 @@ skinparam componentStyle rectangle
 left to right direction
 
 package "Apresentação (View)" {
-  [templates/index.html]
-  [static/styles.css]
+  [src/views/templates/index.html]
+  [src/views/templates/base.html]
+  [src/views/templates/detalhes_compra.html]
+  [src/views/templates/resultados.html]
+  [src/views/static/css/style.css]
 }
 
 package "Controle (Controller)" {
-  [routes.py]
-  [controllers/process_controller.py]
-  [controllers/search_controller.py]
+  [app.py]
+  [src/controllers/process_controller.py]
 }
 
 package "Modelo (Model)" {
-  [models/database.py]
-  [models/compra.py]
-  [models/itens_compra.py]
+  [src/models/database.py]
+  [src/models/compra.py]
+  [src/models/item_compra.py]
 }
 
-package "Serviços Auxiliares" {
-  [utils/ocr_parser.py]
-}
-
-package "Processos Batch" {
+package "Scripts e Processos" {
+  [scripts/init_db.py]
   [scripts/process_daily.py]
+  [scripts/pegar_dados_cupom.py]
+  [scripts/pegar_chave.py]
 }
 
 ' Fluxos
-[templates/index.html] --> [routes.py] 
-[routes.py] --> [controllers/search_controller.py]
+[src/views/templates/index.html] --> [app.py]
+[src/views/templates/detalhes_compra.html] --> [app.py]
+[src/views/templates/resultados.html] --> [app.py]
 
-[scripts/process_daily.py] --> [controllers/process_controller.py] : Aciona processamento
+[app.py] --> [src/controllers/process_controller.py]
 
-[controllers/process_controller.py] --> [utils/ocr_parser.py]
-[controllers/process_controller.py] --> [models/compra.py]
-[controllers/process_controller.py] --> [models/itens_compra.py]
-[controllers/search_controller.py] --> [models/compra.py]
-[controllers/search_controller.py] --> [models/itens_compra.py]
-[models/compra.py] --> [models/database.py]
-[models/itens_compra.py] --> [models/database.py]
+[scripts/process_daily.py] --> [src/controllers/process_controller.py] : Aciona processamento
+[scripts/pegar_dados_cupom.py] --> [scripts/process_daily.py] : Fornece dados
+[scripts/pegar_chave.py] --> [scripts/pegar_dados_cupom.py] : Extrai chaves
+
+[src/controllers/process_controller.py] --> [src/models/compra.py]
+[src/controllers/process_controller.py] --> [src/models/item_compra.py]
+[app.py] --> [src/models/compra.py]
+[app.py] --> [src/models/item_compra.py]
+
+[src/models/compra.py] --> [src/models/database.py]
+[src/models/item_compra.py] --> [src/models/database.py]
+[scripts/init_db.py] --> [src/models/database.py] : Inicializa
+
+' Relação entre models
+[src/models/item_compra.py] --> [src/models/compra.py] : Referencia
 @enduml

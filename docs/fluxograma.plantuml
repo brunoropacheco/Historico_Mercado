@@ -4,6 +4,7 @@ start
 :Acessar pasta NotasNovas;
 if (Existem novas imagens?) then (sim)
   if (Ainda ha imagens a serem processadas?) then (sim)
+    :Aplica melhorias na imagem;
     :Executar pyzbar para extrair o qr code da imagem;
     :Extrair a chave de acesso do link do qr code;
     :Consultar chave de acesso no site da SEFAZ e extrair dados do cupom;

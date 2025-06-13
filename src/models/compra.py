@@ -1,11 +1,9 @@
 from sqlalchemy import (
-    Column, Integer, String, Date, Numeric, Text, create_engine, func, desc, between
+    Column, Integer, String, Date, Numeric, Text
 )
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from src.models.database import Base, SessionLocal
 import datetime
 import os
-
-Base = declarative_base()
 
 class Compra(Base):
     __tablename__ = 'compras'
@@ -13,7 +11,7 @@ class Compra(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     data = Column(Date, default=datetime.date.today, nullable=False)
     estabelecimento = Column(String(200), nullable=False)
-    cnpj = Column(String(14), nullable=False)
+    cnpj = Column(String(20), nullable=False)
     total = Column(Numeric(10, 2), nullable=False)
     
     def salvar(self):
@@ -105,10 +103,3 @@ class Compra(Base):
             return session.query(cls).order_by(cls.data.desc()).limit(limit).all()
         finally:
             session.close()
-
-# Caminho absoluto para o banco de dados
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'data', 'database', 'db.sqlite3')}"
-
-engine = create_engine(DATABASE_URL, echo=False)
-SessionLocal = sessionmaker(bind=engine)

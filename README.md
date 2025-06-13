@@ -16,7 +16,7 @@ Atualmente, o projeto encontra-se em fase de desenvolvimento com as seguintes fu
 *   **Download e Processamento de Imagens:** Novas imagens são baixadas, processadas e depois excluídas do servidor local.
 *   **Extração de Chave de Acesso via QR Code:** O sistema identifica e extrai a chave de acesso NFC-e a partir do QR code presente nas imagens.
 *   **Consulta Automatizada à SEFAZ:** Utilizando a chave obtida, o sistema consulta o portal da Secretaria da Fazenda para extrair dados do cupom fiscal.
-*   **Persistência de Dados:** Os dados extraídos são salvos em um banco de dados SQLite para consultas posteriores.
+*   **Persistência de Dados:** Os dados extraídos são salvos em um banco de dados postgresql na plataforma Railway para consultas posteriores.
 *   **Interface Web Básica:** Uma interface web implementada com Flask permite a consulta de produtos e visualização de compras.
 
 **Funcionalidades Ainda Pendentes:**
@@ -67,7 +67,7 @@ Para melhor eficiência do sistema:
 ## Tecnologias Utilizadas
 
 - **Python** (OpenCV, pyzbar, Flask)
-- **SQLite** (banco de dados local)
+- **PostgreSQL** (banco de dados na plataforma Railway)
 - **Google Drive API** (monitoramento de imagens)
 - **HTML/CSS** (interface web)
 - **PlantUML** (documentação dos fluxos)
@@ -100,6 +100,7 @@ sudo apt-get install libgl1 libzbar0
 Essas bibliotecas são necessárias para o funcionamento do OpenCV (`cv2`) e do `pyzbar`.
 
 ### Inicialização do Banco de Dados
+
 
 Antes de executar o sistema pela primeira vez, crie o banco de dados SQLite:
 
@@ -151,6 +152,11 @@ Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive
     export GOOGLE_DRIVE_CREDENTIALS='{"type":"service_account","project_id":"seu-projeto",...}'
     export GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID='id-da-pasta-de-novas-notas'
     export GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID='id-da-pasta-de-notas-tratadas'
+    export POSTGRES_USER="seu_usuario"  # Normalmente "postgres"
+    export POSTGRES_PASSWORD="sua_senha"
+    export POSTGRES_DB="nome_database"  # Normalmente "railway"
+    export RAILWAY_TCP_PROXY_DOMAIN="seu_dominio.proxy.rlwy.net"
+    export RAILWAY_TCP_PROXY_PORT="porta_numerica"  
     ```
 
     **Windows:**

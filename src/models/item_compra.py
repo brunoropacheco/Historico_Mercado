@@ -1,13 +1,10 @@
 from sqlalchemy import (
     Column, Integer, String, Date, Numeric, Text, create_engine, or_, func
 )
-from sqlalchemy.orm import declarative_base, sessionmaker, joinedload
-import os
 
 # Importar o modelo Compra para junção (join)
 from src.models.compra import Compra
-
-Base = declarative_base()
+from src.models.database import Base, SessionLocal
 
 class ItemCompra(Base):
     __tablename__ = 'itens_compra'
@@ -107,10 +104,3 @@ class ItemCompra(Base):
             return session.query(cls).filter(cls.compra_id == compra_id).all()
         finally:
             session.close()
-
-# Caminho absoluto para o banco de dados
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'data', 'database', 'db.sqlite3')}"
-
-engine = create_engine(DATABASE_URL, echo=False)
-SessionLocal = sessionmaker(bind=engine)

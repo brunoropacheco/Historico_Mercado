@@ -58,4 +58,4 @@ jobs:
         python scripts/process_daily.py
     - name: Inicializar app
       run: |
-        python app.py
+        python app.py &

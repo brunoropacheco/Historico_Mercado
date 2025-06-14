@@ -19,6 +19,17 @@ jobs:
 
     runs-on: ubuntu-latest
     environment: development
+    env:
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+        GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID }}
+        GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID }}
+        PGDATA: ${{ vars.PGDATA }}
+        PGUSER: ${{ vars.PGUSER }}
+        POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+        POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+        RAILWAY_TCP_PROXY_DOMAIN: ${{ vars.RAILWAY_TCP_PROXY_DOMAIN }}
+        RAILWAY_TCP_PROXY_PORT: ${{ vars.RAILWAY_TCP_PROXY_PORT }}
 
     steps:
     - uses: actions/checkout@v4
@@ -40,44 +51,11 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Inicializar Banco
-      env:
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
-        GOOGLE_DRIVE_FOLDER_NOTASTRATADA_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID }}
-        GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID }}
-        PGDATA: ${{ vars.PGDATA }}
-        PGUSER: ${{ vars.PGUSER }}
-        POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-        POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-        RAILWAY_TCP_PROXY_DOMAIN: ${{ vars.RAILWAY_TCP_PROXY_DOMAIN }}
-        RAILWAY_TCP_PROXY_PORT: ${{ vars.RAILWAY_TCP_PROXY_PORT }}
       run: |
         python scripts/init_db.py
     - name: Inicializar script diario
-      env:
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
-        GOOGLE_DRIVE_FOLDER_NOTASTRATADA_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID }}
-        GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID }}
-        PGDATA: ${{ vars.PGDATA }}
-        PGUSER: ${{ vars.PGUSER }}
-        POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-        POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-        RAILWAY_TCP_PROXY_DOMAIN: ${{ vars.RAILWAY_TCP_PROXY_DOMAIN }}
-        RAILWAY_TCP_PROXY_PORT: ${{ vars.RAILWAY_TCP_PROXY_PORT }}
       run: |
         python scripts/process_daily.py
     - name: Inicializar app
-      env:
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
-        GOOGLE_DRIVE_FOLDER_NOTASTRATADA_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOTASTRATADAS_ID }}
-        GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_NOVASNOTAS_ID }}
-        PGDATA: ${{ vars.PGDATA }}
-        PGUSER: ${{ vars.PGUSER }}
-        POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-        POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-        RAILWAY_TCP_PROXY_DOMAIN: ${{ vars.RAILWAY_TCP_PROXY_DOMAIN }}
-        RAILWAY_TCP_PROXY_PORT: ${{ vars.RAILWAY_TCP_PROXY_PORT }}
       run: |
         python app.py

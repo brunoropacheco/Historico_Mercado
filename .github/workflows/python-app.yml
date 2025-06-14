@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches: [ "main" ]
 
@@ -16,9 +15,8 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    environment: ${{ vars.ENVIRONMENT_NAME }}
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     env:
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}

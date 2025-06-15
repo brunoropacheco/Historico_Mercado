@@ -4,6 +4,8 @@
 name: Python application
 
 on:
+  schedule:
+    - cron: "*/5 * * * *"
   push:
     branches:
       - main
@@ -55,6 +57,3 @@ jobs:
     - name: Inicializar script diario
       run: |
         python scripts/process_daily.py
-    - name: Inicializar app
-      run: |
-        python app.py &

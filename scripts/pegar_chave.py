@@ -14,6 +14,9 @@
 
 import re
 import cv2
+import numpy as np
+import pyheif
+from PIL import Image
 from pyzbar.pyzbar import decode
 import urllib.parse
 
@@ -22,10 +25,23 @@ def extrair_chave(image_path):
     Extrai a chave de acesso da nota fiscal lendo o QR code presente na imagem.
     QR codes de NFC-e geralmente contêm uma URL que inclui a chave de acesso.
     """
-    # Carregar a imagem
+    # Tenta ler a imagem normalmente
     image = cv2.imread(image_path)
     if image is None:
-        raise ValueError(f"Não foi possível ler a imagem: {image_path}")
+        # Tenta ler como HEIC
+        try:
+            heif_file = pyheif.read(image_path)
+            image_pil = Image.frombytes(
+                heif_file.mode, 
+                heif_file.size, 
+                heif_file.data,
+                "raw",
+                heif_file.mode,
+                heif_file.stride,
+            )
+            image = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+        except Exception as e:
+            raise ValueError(f"Não foi possível ler a imagem: {image_path}. Erro: {e}")
     
     # Criar várias versões da imagem com diferentes pré-processamentos
     images_to_try = [

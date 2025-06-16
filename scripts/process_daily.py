@@ -53,7 +53,10 @@ def authenticate_google_drive():
 def is_receipt_image(file):
     """Check if the file is likely a receipt image based on mime type"""
     mime_type = file.get('mimeType', '')
-    return mime_type.startswith('image/')
+    return (
+        mime_type.startswith('image/')
+        or mime_type in ['image/heic', 'image/heif']
+    )
 
 def download_and_process_image(drive_service, file_id, file_name):
     """Download the image from Google Drive and save it to local directory"""
@@ -194,7 +197,8 @@ def main():
                         logger.info(f"Chave de acesso extraída: {chave}")
                         logger.info(f"Extraindo dados do cupom via site SEFAZ")
                         dados_cupom = pegar_dados_cupom.extrair_dados_cupom(chave)
-                        if dados_cupom:
+
+                        if type(dados_cupom) == dict:
                             logger.info(f"Dados do cupom extraídos: {dados_cupom}")
                             salvar_dados_nota(dados_cupom)
                             logger.info(f"Dados do cupom salvos com sucesso para a chave: {chave}")

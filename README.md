@@ -8,20 +8,25 @@ O sistema é composto por dois principais módulos:
 - **Batch Diário:** Responsável por monitorar uma pasta no Google Drive, detectar novas imagens de notas fiscais, processar as imagens, extrair chave do QR code do cupom, consultar SEFAZ e atualizar o banco de dados.
 - **Web App:** Permite ao usuário consultar o histórico de preços de produtos a partir dos dados extraídos.
 
-## Status do Projeto (Versão 0.1.0 - Em Desenvolvimento)
+## Status do Projeto (Versão 1.0.0 - Estavel)
 
-Atualmente, o projeto encontra-se em fase de desenvolvimento com as seguintes funcionalidades implementadas:
+Atualmente, o projeto encontra-se estavel com as seguintes funcionalidades implementadas:
 
-*   **Monitoramento de Pasta no Google Drive:** O script `scripts/process_daily.py` monitora pastas especificadas no Google Drive em busca de novas imagens.
+*   **Monitoramento de Pasta no Google Drive:** O script `scripts/process_daily.py` monitora pastas especificadas no Google Drive em busca de novas imagens. Este script roda de 12 em 12 horas no github actions.
 *   **Download e Processamento de Imagens:** Novas imagens são baixadas, processadas e depois excluídas do servidor local.
 *   **Extração de Chave de Acesso via QR Code:** O sistema identifica e extrai a chave de acesso NFC-e a partir do QR code presente nas imagens.
 *   **Consulta Automatizada à SEFAZ:** Utilizando a chave obtida, o sistema consulta o portal da Secretaria da Fazenda para extrair dados do cupom fiscal.
 *   **Persistência de Dados:** Os dados extraídos são salvos em um banco de dados postgresql na plataforma Railway para consultas posteriores.
-*   **Interface Web Básica:** Uma interface web implementada com Flask permite a consulta de produtos e visualização de compras.
+*   **Interface Web Básica:** Uma interface web implementada com Flask permite a consulta de produtos e visualização de compras. Esta interface hoje tambem roda no railway.
 
-**Funcionalidades Ainda Pendentes:**
+## Melhorias Previstas ##
 
-*   Implantação em ambiente produtivo fora do github codespaces
+1. Login via google
+2. Fazer upload do cupom fiscal direto no site
+3. Melhorar interface grafica
+4. Mostrar na tabela de busca mais detalhes da compra quando aquele item foi comprado
+5. Check de seguranca
+6. Mover notas que nao puderam ser processadas para pasta de erro
 
 ## Casos de Uso
 
@@ -53,7 +58,7 @@ O sistema funciona com o seguinte fluxo:
 O sistema foi implementado para lidar com erros sem interromper o processamento:
 - Se não conseguir ler o QR code de uma imagem, passa para a próxima
 - Qualquer erro durante o processamento é registrado no log e o sistema continua
-- As imagens com erro também são movidas para a pasta de tratados
+- As imagens com erro permanecem na pasta de notas novas
 
 ## Boas Práticas para Captura de Imagens
 
@@ -63,6 +68,7 @@ Para melhor eficiência do sistema:
 - Certifique-se de que o QR code esteja bem visível e não deformado
 - Evite reflexos, sombras ou obstruções no QR code
 - Mantenha a câmera estável ao fotografar
+- Caso o cupom tenha sido emitido em contingencia, a consulta a sefaz pode falhar
 
 ## Tecnologias Utilizadas
 
@@ -72,6 +78,8 @@ Para melhor eficiência do sistema:
 - **HTML/CSS** (interface web)
 - **PlantUML** (documentação dos fluxos)
 - **Flask** (servidor WEB)
+- **GitHub Actions** (executa o script de 12 em 12 horas)
+- **Railway** (hospeda o banco de dados e a aplicacao web)
 
 ## Diagramas
 
@@ -100,7 +108,6 @@ sudo apt-get install libgl1 libzbar0
 Essas bibliotecas são necessárias para o funcionamento do OpenCV (`cv2`) e do `pyzbar`.
 
 ### Inicialização do Banco de Dados
-
 
 Antes de executar o sistema pela primeira vez, crie o banco de dados SQLite:
 
@@ -194,13 +201,11 @@ app.py                      # Aplicação Flask com rotas definidas
 
 ### Execução da Aplicação Web
 
-Para executar a aplicação web localmente:
+Para executar a aplicação web:
 
 ```sh
 python app.py
 ```
-
-A aplicação estará disponível em http://localhost:5000
 
 ## Utilitários PostgreSQL
 
@@ -222,5 +227,3 @@ PGUSER=$POSTGRES_USER PGHOST=$RAILWAY_TCP_PROXY_DOMAIN PGPORT=$RAILWAY_TCP_PROXY
 ```
 
 Esse comando remove todos os registros das tabelas `compras` e `itens_compra`, mas mantém a estrutura das tabelas e reinicia os contadores de IDs.
-
-

@@ -202,4 +202,25 @@ python app.py
 
 A aplicação estará disponível em http://localhost:5000
 
-## Próximos Passos
+## Utilitários PostgreSQL
+
+### Instalar o cliente PostgreSQL
+
+Para executar comandos SQL diretamente no banco de dados, instale o cliente do PostgreSQL no seu sistema (Linux):
+
+```sh
+sudo apt-get update
+sudo apt-get install -y postgresql-client
+```
+
+### Limpar os dados do banco sem remover as tabelas
+
+Para apagar todos os dados das tabelas (mantendo as tabelas e reiniciando os IDs), execute o comando abaixo no terminal, substituindo as variáveis conforme seu ambiente:
+
+```sh
+PGUSER=$POSTGRES_USER PGHOST=$RAILWAY_TCP_PROXY_DOMAIN PGPORT=$RAILWAY_TCP_PROXY_PORT PGPASSWORD=$POSTGRES_PASSWORD psql -d $POSTGRES_DB -c "TRUNCATE TABLE compras, itens_compra RESTART IDENTITY CASCADE;"
+```
+
+Esse comando remove todos os registros das tabelas `compras` e `itens_compra`, mas mantém a estrutura das tabelas e reinicia os contadores de IDs.
+
+

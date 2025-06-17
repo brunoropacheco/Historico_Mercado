@@ -95,38 +95,33 @@ def extrair_dados_cupom(chave_original):
         response_post = session.post(url, data=payload, headers=post_headers)
         
         print(f"Status Code da resposta da requisicao POST: {response_post.status_code}")
-        
-        # Passo 4: Verificar se a resposta contém resultado ou pede CAPTCHA
-        if "captcha" in response_post.text.lower() or "código da imagem" in response_post.text.lower():
-            print("AVISO: O site está solicitando CAPTCHA. Tentando usar arquivo HTML existente.")
-            raise Exception("CAPTCHA solicitado")
-        
+        print(response_post.text[:500])  # Exibir os primeiros 500 caracteres da resposta
+        # Passo 4: Verificar se a resposta contém resultado ou foi bloqueada
+        bloqueio_strings = [
+            "solicitação foi bloqueada",
+            "acesso bloqueado",
+            "bloqueado por questões de segurança",
+            "bloqueio temporário",
+            "bloqueio permanente",
+            "bloqueio de acesso"
+        ]
+        if any(b in response_post.text.lower() for b in bloqueio_strings):
+            print("AVISO: A solicitação foi bloqueada. Nenhum arquivo será salvo.")
+            raise Exception("Solicitação bloqueada")
+
         # Salvar a resposta em um arquivo
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(response_post.text)
-        
+
         #print("\nPrimeiros 500 caracteres da resposta:")
         #print(response_post.text[:500])
         print("\nResposta completa salva em 'resposta_consulta.html'")
         
         # Extrair dados do HTML recém-baixado
         return extrair_dados_html(html_path)
-        
     except Exception as e:
-        print(f"Aviso durante consulta online: {e}")
-        print("Tentando usar o arquivo HTML existente...")
-        
-        # Verificar se o arquivo HTML existe
-        if os.path.exists(html_path):
-            print(f"Usando arquivo HTML existente: {html_path}")
-            try:
-                return extrair_dados_html(html_path)
-            except Exception as html_error:
-                print(f"Erro ao processar arquivo HTML existente: {html_error}")
-                return None
-        else:
-            print(f"Arquivo HTML não existe: {html_path}")
-            return None
+        print(f"Erro ao fazer a requisição: {e}")
+        return e
 
 def extrair_dados_html(path_html):
     with open(path_html, encoding='utf-8') as f:

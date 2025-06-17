@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 import sys
 import logging
+from src.controllers.process_controller import buscar_itens_por_termo, buscar_compras_recentes, obter_detalhes_compra
 
 # Configurar logging
 logging.basicConfig(
@@ -15,7 +16,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from src.controllers.process_controller import buscar_itens_por_termo, buscar_compras_recentes, obter_detalhes_compra
+
 
 app = Flask(__name__, 
            template_folder=os.path.join('src', 'views', 'templates'),

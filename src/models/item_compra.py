@@ -64,7 +64,7 @@ class ItemCompra(Base):
             # Realizar a consulta com join na tabela Compra
             query = session.query(cls, Compra)\
                 .join(Compra, cls.compra_id == Compra.id)\
-                .filter(cls.descricao.like(termo_busca))\
+                .filter(cls.descricao.ilike(termo_busca))\
                 .order_by(Compra.data.desc())\
                 .limit(limit).offset(offset)
             

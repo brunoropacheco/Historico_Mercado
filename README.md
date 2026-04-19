@@ -142,7 +142,7 @@ Para utilizar a funcionalidade de monitoramento de notas fiscais no Google Drive
     2.  Vá para a aba "Chaves"
     3.  Clique em "Adicionar chave" > "Criar nova chave"
     4.  Selecione o formato JSON e clique em "Criar"
-    5.  O arquivo de credenciais será baixado automaticamente para seu computador
+    5.  O arquivo de credenciais será baixado automaticamente para seu computador > esta salvo no meu google drive na pasta do projeto em financas
     6.  **IMPORTANTE**: Mantenha este arquivo seguro e nunca o adicione ao controle de versão
 
 5.  **Compartilhar pastas do Google Drive com a conta de serviço**
